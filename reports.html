@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Meal Tracker</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #f32144;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --text-color: #333;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+
+        .back-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background-color: #d91a3a;
+        }
+
+        .report-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-card h2 {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--bg-color);
+            border-radius: 10px;
+        }
+
+        .filter-section {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background-color: #d91a3a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Reports</h1>
+            <a href="manager_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div class="filter-section">
+            <input type="date" class="filter-input" id="startDate" aria-label="Start Date" placeholder="Start Date">
+            <input type="date" class="filter-input" id="endDate" aria-label="End Date" placeholder="End Date">
+            <select class="filter-input" id="sessionFilter" aria-label="Filter by session">
+                <option value="">All Sessions</option>
+                <option value="Morning">Morning</option>
+                <option value="Evening">Evening</option>
+            </select>
+            <button class="filter-btn" onclick="generateReport()">
+                <i class="fas fa-chart-bar"></i> Generate Report
+            </button>
+        </div>
+
+        <div class="report-card">
+            <h2>Summary Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Entries</h3>
+                    <p id="totalEntries">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Morning Entries</h3>
+                    <p id="morningEntries">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Evening Entries</h3>
+                    <p id="eveningEntries">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Users</h3>
+                    <p id="activeUsers">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card">
+            <h2>Department-wise Distribution</h2>
+            <div class="chart-container" id="departmentChart">
+                <!-- Chart will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if manager is logged in
+        function checkAuth() {
+            const manager = JSON.parse(localStorage.getItem('manager'));
+            if (!manager) {
+                window.location.href = 'manager_login.html';
+            }
+        }
+
+        // Load and display report data
+        async function generateReport() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const session = document.getElementById('sessionFilter').value;
+
+                const response = await fetch('http://localhost:3000/api/entries');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch entries');
+                }
+                const entries = await response.json();
+
+                // Filter entries based on date range and session
+                let filteredEntries = entries;
+                if (startDate && endDate) {
+                    filteredEntries = entries.filter(entry => {
+                        const entryDate = new Date(entry.timestamp);
+                        return entryDate >= new Date(startDate) && entryDate <= new Date(endDate);
+                    });
+                }
+                if (session) {
+                    filteredEntries = filteredEntries.filter(entry => entry.session === session);
+                }
+
+                // Update statistics
+                updateStatistics(filteredEntries);
+                updateDepartmentChart(filteredEntries);
+            } catch (error) {
+                console.error('Error generating report:', error);
+                alert('Failed to generate report. Please try again.');
+            }
+        }
+
+        // Update statistics
+        function updateStatistics(entries) {
+            document.getElementById('totalEntries').textContent = entries.length;
+            document.getElementById('morningEntries').textContent = 
+                entries.filter(entry => entry.session === 'Morning').length;
+            document.getElementById('eveningEntries').textContent = 
+                entries.filter(entry => entry.session === 'Evening').length;
+            document.getElementById('activeUsers').textContent = 
+                new Set(entries.map(entry => entry.userId)).size;
+        }
+
+        // Update department chart
+        function updateDepartmentChart(entries) {
+            const departmentCounts = {};
+            entries.forEach(entry => {
+                departmentCounts[entry.department] = (departmentCounts[entry.department] || 0) + 1;
+            });
+
+            const chartContainer = document.getElementById('departmentChart');
+            chartContainer.innerHTML = '';
+
+            // Create a simple bar chart using divs
+            Object.entries(departmentCounts).forEach(([department, count]) => {
+                const bar = document.createElement('div');
+                bar.style.height = `${count * 10}px`;
+                bar.style.backgroundColor = 'var(--primary-color)';
+                bar.style.margin = '5px 0';
+                bar.style.borderRadius = '5px';
+                bar.style.display = 'flex';
+                bar.style.alignItems = 'center';
+                bar.style.padding = '0 10px';
+                bar.style.color = 'white';
+                bar.style.fontWeight = '500';
+                bar.textContent = `${department}: ${count}`;
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        // Set default date range to current month
+        function setDefaultDateRange() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+        }
+
+        // Initialize page
+        function init() {
+            checkAuth();
+            setDefaultDateRange();
+            generateReport();
+        }
+
+        // Run initialization
+        init();
+    </script>
+</body>
+</html> 

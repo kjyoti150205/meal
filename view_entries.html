@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Entries - Meal Tracker</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #f32144;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --text-color: #333;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+
+        .back-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background-color: #d91a3a;
+        }
+
+        .entries-table {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .entries-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .entries-table th,
+        .entries-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .entries-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        .entries-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .delete-btn {
+            padding: 0.5rem 1rem;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .status-on {
+            color: var(--success-color);
+            font-weight: 500;
+        }
+
+        .status-off {
+            color: var(--danger-color);
+            font-weight: 500;
+        }
+
+        .no-entries {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .filter-section {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            flex: 1;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background-color: #d91a3a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>View Entries</h1>
+            <a href="manager_dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div class="filter-section">
+            <input type="text" class="filter-input" id="searchInput" placeholder="Search by name, department, or room number...">
+            <select class="filter-input" id="sessionFilter" aria-label="Filter by session">
+                <option value="">All Sessions</option>
+                <option value="Morning">Morning</option>
+                <option value="Evening">Evening</option>
+            </select>
+            <button class="filter-btn" onclick="applyFilters()">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+        </div>
+
+        <div class="entries-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Room Number</th>
+                        <th>Session</th>
+                        <th>Status</th>
+                        <th>Timestamp</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="entriesTableBody">
+                    <!-- Entries will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Check if manager is logged in
+        function checkAuth() {
+            const manager = JSON.parse(localStorage.getItem('manager'));
+            if (!manager) {
+                window.location.href = 'manager_login.html';
+            }
+        }
+
+        // Load entries
+        async function loadEntries() {
+            try {
+                const response = await fetch('http://localhost:3000/api/entries');
+                const entries = await response.json();
+                displayEntries(entries);
+            } catch (error) {
+                console.error('Error loading entries:', error);
+            }
+        }
+
+        // Display entries in table
+        function displayEntries(entries) {
+            const tableBody = document.getElementById('entriesTableBody');
+            tableBody.innerHTML = '';
+
+            if (entries.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-entries">
+                            No entries found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            entries.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.name}</td>
+                    <td>${entry.department}</td>
+                    <td>${entry.roomNumber}</td>
+                    <td>${entry.session}</td>
+                    <td class="status-${entry.status.toLowerCase()}">${entry.status}</td>
+                    <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteEntry('${entry._id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Delete entry
+        async function deleteEntry(entryId) {
+            if (!confirm('Are you sure you want to delete this entry?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/entries/${entryId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete entry');
+                }
+
+                // Reload entries after successful deletion
+                loadEntries();
+            } catch (error) {
+                console.error('Error deleting entry:', error);
+                alert('Failed to delete entry. Please try again.');
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sessionFilter = document.getElementById('sessionFilter').value;
+
+            const rows = document.querySelectorAll('#entriesTableBody tr');
+            rows.forEach(row => {
+                const name = row.cells[0]?.textContent.toLowerCase() || '';
+                const department = row.cells[1]?.textContent.toLowerCase() || '';
+                const roomNumber = row.cells[2]?.textContent.toLowerCase() || '';
+                const session = row.cells[3]?.textContent || '';
+
+                const matchesSearch = name.includes(searchTerm) || 
+                                   department.includes(searchTerm) || 
+                                   roomNumber.includes(searchTerm);
+                const matchesSession = !sessionFilter || session === sessionFilter;
+
+                row.style.display = matchesSearch && matchesSession ? '' : 'none';
+            });
+        }
+
+        // Initialize page
+        function init() {
+            checkAuth();
+            loadEntries();
+        }
+
+        // Run initialization
+        init();
+    </script>
+</body>
+</html> 

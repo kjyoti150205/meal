@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "5n668blum",
+    "fullName": "manager",
+    "email": "manager1@gmail.com",
+    "password": "$2a$10$JhDKnZAkxo37VGK6qAR9..zxH1oDZ3KRbsyuAsrIxwU2P2ubd5FQ6"
+  },
+  {
+    "_id": "p8xjhzg35",
+    "fullName": "manager",
+    "email": "manager@gmail.com",
+    "password": "$2a$10$L5LYuCI65MMAN3OVMnAhv.wpCT0jE4.SjIrxVqzWhF8kW944WZ8oC"
+  },
+  {
+    "_id": "1k3bvz9tl",
+    "fullName": "Abhinit Kumar",
+    "email": "ak0978096@gmail.com",
+    "password": "$2a$10$sdh4n8MnMJorySvtgpugV.gRgSt.QopNOgAzdM6qJahp0pTor.jQu"
+  },
+  {
+    "_id": "cxzg30h5m",
+    "fullName": "Abhinit Kumar",
+    "email": "ak09780964@gmail.com",
+    "password": "$2a$10$/P01SqIzRK1mWDYHlUr9BeGiVx0YKLzI75girqFXCiRvixprzkfJS"
+  },
+  {
+    "_id": "e98ce1adh",
+    "fullName": "Abhinit Kumar",
+    "email": "ak09780967@gmail.com",
+    "password": "$2a$10$EJj/0572YHK2KsiYjK2paeQRYUWZvVsOH4DhGuvbT.7viH27nMOKS"
+  }
+]

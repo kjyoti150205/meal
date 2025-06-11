@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Tracker - Home</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #f32144;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --text-color: #333;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            background: #f5f7fa;
+            overflow-x: hidden;
+        }
+
+        /* Top Bar for Date and Time */
+        .top-bar {
+            width: 100%;
+            background: #2c3e50; /* Changed navbar color to dark blue */
+            padding: 15px 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            color: white;
+            display: flex;
+            justify-content: space-between; /* Adjusted to space-between for title and datetime */
+            align-items: center;
+            z-index: 100;
+            position: sticky; /* Make it sticky at the top */
+            top: 0;
+        }
+
+        .top-bar h2 {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0;
+            flex-grow: 1; /* Allows title to take available space */
+        }
+
+        .top-bar .datetime-display {
+            position: static; /* Override fixed position */
+            background: none; /* No background here */
+            padding: 0;
+            box-shadow: none;
+            border: none;
+            min-width: unset;
+            text-align: right;
+        }
+
+        .top-bar .datetime-display .date {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .top-bar .datetime-display .time {
+            color: white; /* Changed time color to white */
+            font-size: 1.5rem;
+            text-shadow: none;
+        }
+
+        /* Background Design */
+        .background-design {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                linear-gradient(135deg, rgba(243, 33, 68, 0.1) 0%, rgba(243, 33, 68, 0) 100%),
+                url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=2000') center/cover;
+            opacity: 0.4; /* Increased opacity for more prominence */
+        }
+
+        /* Container adjustments */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 40px auto; /* Adjust margin to account for top bar */
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* Added for Safari support */
+        }
+
+        /* Header styling */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color:green;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .option-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* Added for Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .option-card i {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .option-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .option-card h2 {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .option-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            color: white;
+            background: var(--primary-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            background-color: #d91a3a; /* Darker shade on hover */
+        }
+
+        .btn-secondary {
+            background: #6c757d; /* A common secondary color */
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268; /* Darker shade on hover */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar for Date and Time -->
+    <div class="top-bar">
+        <h2>RADHA KRISHNAN BHAWAN (BT MEN'S) HOSTEL</h2>
+        <div class="datetime-display">
+            <div class="date" id="currentDate">Loading...</div>
+            <div class="time" id="currentTime">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Background Design -->
+    <div class="background-design"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>RADHA KRISHNAN BHAWAN (BT MEN'S) HOSTEL</h1>
+            <p>Manage your meals efficiently with our easy-to-use meal tracking system.</p>
+        </div>
+
+        <div class="options-grid">
+            <div class="option-card">
+                <i class="fas fa-user"></i>
+                <h2>Student Access</h2>
+                <p>Track your meals and manage your meal preferences as a student.</p>
+                <div class="btn-group">
+                    <a href="login.html" class="btn">Login</a>
+                    <a href="register.html" class="btn btn-secondary">Register</a>
+                </div>
+            </div>
+
+            <div class="option-card">
+                <i class="fas fa-user-tie"></i>
+                <h2>Manager Access</h2>
+                <p>Manage meal entries and view reports as a manager.</p>
+                <div class="btn-group">
+                    <a href="manager_login.html" class="btn">Login</a>
+                    <a href="manager_register.html" class="btn btn-secondary">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+        }
+
+        // Update time every second
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Dynamic redirection based on login status
+        const user = localStorage.getItem('user');
+        const manager = localStorage.getItem('manager');
+
+        if (user) {
+            window.location.href = 'user_dashboard.html';
+        } else if (manager) {
+            window.location.href = 'manager_dashboard.html';
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Meal Tracker</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --primary-dark: #1976D2;
+            --primary-light: #BBDEFB;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --text-color: #333;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .welcome-message {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .welcome-message h2 {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .welcome-message p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-button {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            background: var(--primary-light);
+        }
+
+        .action-button i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        .action-button h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .action-button p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .home-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .home-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .logout-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Meal Tracker</h1>
+            <div class="user-info">
+                <a href="index.html" class="btn home-btn">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <img id="profilePic" src="" alt="Profile Picture" class="profile-pic">
+                <span id="userName" class="user-name">Loading...</span>
+                <button onclick="logout()" class="btn logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="welcome-message">
+            <h2>Welcome to the Manager Dashboard</h2>
+            <p>Manage meal entries, view student records, and generate reports from this central hub.</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="view_entries.html" class="action-button">
+                <i class="fas fa-utensils"></i>
+                <h3>View Entries</h3>
+                <p>View and manage meal entries</p>
+            </a>
+            <a href="student_records.html" class="action-button">
+                <i class="fas fa-user-graduate"></i>
+                <h3>Student Records</h3>
+                <p>View student meal preferences and history</p>
+            </a>
+            <a href="reports.html" class="action-button">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Generate Reports</h3>
+                <p>Create and download meal reports</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Check if manager is logged in
+        const manager = JSON.parse(localStorage.getItem('manager'));
+        if (!manager) {
+            window.location.href = 'manager_login.html';
+        }
+
+        // Display manager information
+        document.getElementById('userName').textContent = manager.fullName;
+        
+        // Set profile picture
+        const profilePic = document.getElementById('profilePic');
+        if (manager.photoUrl) {
+            profilePic.src = manager.photoUrl;
+        } else {
+            profilePic.src = 'https://via.placeholder.com/40';
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('manager');
+            window.location.href = 'manager_login.html';
+        }
+    </script>
+</body>
+</html>

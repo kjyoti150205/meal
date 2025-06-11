@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "m29vosjzi",
+    "fullName": "Abhinit Kumar",
+    "email": "ak0978096@gmail.com",
+    "password": "$2a$10$LZZSc.uUreg90UEEaM.Dlu5nBCFa0PR9Dkm.2DIGMijEzAessrT1a",
+    "department": "dets",
+    "roomNumber": "14",
+    "photoUrl": "/uploads/photo-1749149525342-484863085.png",
+    "lastUpdated": "2025-06-05T18:52:05.374Z"
+  },
+  {
+    "_id": "37hlyelbd",
+    "fullName": "Abhinit Kumar",
+    "email": "ak09780964@gmail.com",
+    "password": "$2a$10$wBKsBunjIzww35HTUlHv3eyNfq7oUbzfUyqD6JJQZ0Di3kWO10242",
+    "department": "",
+    "roomNumber": ""
+  },
+  {
+    "_id": "bbqixhcjc",
+    "fullName": "test",
+    "email": "test123@gmail.com",
+    "password": "$2a$10$VTQE6mFe./rRnfDN9kuj8eku2eK/jCDlKNxqYK/Btw9buL3elzDZO",
+    "department": "cse",
+    "roomNumber": "14"
+  },
+  {
+    "_id": "xeg7w0iv5",
+    "fullName": "Abhinit Kumar",
+    "email": "ak09780967@gmail.com",
+    "password": "$2a$10$8137SoGt4Fpoeys7gXSJU.baJnyoZSnSRNTqa0ZdG6aYQulXf/viK",
+    "instituteId": "123456",
+    "department": "dets",
+    "roomNumber": "14",
+    "photoUrl": "/uploads/photo-1749537166204-47031996.png",
+    "lastUpdated": "2025-06-10T06:32:47.494Z"
+  },
+  {
+    "_id": "vy1ym9byt",
+    "fullName": "test",
+    "email": "aak0978096@gmail.com",
+    "password": "$2a$10$KbRDiEpdFOOJ4cEfz8nm7OWGyD5JQIW3Lmo2ou3bmBzyW4P2TXBdi",
+    "instituteId": "123456",
+    "department": "det",
+    "roomNumber": "14",
+    "photoUrl": "/uploads/photo-1749541740203-725377456.png"
+  },
+  {
+    "_id": "h8itqpj9g",
+    "fullName": "jyoti  singh",
+    "email": "kjyoti150205@gmail.com",
+    "password": "$2a$10$vXCC1PTP/XkltvBkVB8XQOs3jTrV9XytPwrSG7WSQCpCTo.TexZBa",
+    "instituteId": "270156",
+    "department": "",
+    "roomNumber": ""
+  }
+]
