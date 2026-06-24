@@ -1,3 +1,13 @@
+const User = require('./models/User');
+const Manager = require('./models/Manager');
+const Entry = require('./models/Entry');
+const adminAuthRoutes = require('./routes/adminAuth');
+const adminUsersRoutes = require('./routes/adminUsers');
+const authAdmin = require('./middleware/authAdmin');
+const { transporter } = require('./utils/email');
+require('dotenv').config({ path: './config.env' });
+
+const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -7,7 +17,34 @@ const multer = require('multer');
 
 const app = express();
 const port = 3000;
+console.log(process.env.MONGO_URI);
+// MongoDB Connection
+console.log(process.env.MONGO_URI);
+mongoose.connection.once('open', () => {
+    console.log('✅ MongoDB Connected Successfully');
+});
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+    console.log("✅ MongoDB Connected");
+})
+.catch((err) => {
+    console.error("❌ MongoDB Error:", err);
+});
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+    console.log("✅ MongoDB Connected");
+})
+.catch((err) => {
+    console.error("❌ MongoDB Error:", err);
+});
 
+mongoose.connection.on('error', err => {
+    console.log("DB Error:", err);
+});
+
+mongoose.connection.once('open', () => {
+    console.log("DB Opened Successfully");
+});
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', __dirname);
@@ -15,13 +52,14 @@ app.set('views', __dirname);
 // Middleware
 app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'DELETE'],
-    allowedHeaders: ['Content-Type']
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname)); // Serve static files from current directory
-
+app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 // Create uploads directory if it doesn't exist
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -110,46 +148,59 @@ function generateId() {
 app.post('/api/register', async (req, res) => {
     try {
         const { fullName, email, password, instituteId } = req.body;
-        const users = readData(USERS_FILE);
 
-        // Validate institute ID
         if (!instituteId || !/^\d{6}$/.test(instituteId)) {
-            return res.status(400).json({ message: 'Institute ID must be exactly 6 digits' });
+            return res.status(400).json({
+                message: 'Institute ID must be exactly 6 digits'
+            });
         }
 
-        // Check if user already exists
-        if (users.find(user => user.email === email)) {
-            return res.status(400).json({ message: 'User already exists' });
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                message: 'User already exists'
+            });
         }
 
-        // Check if institute ID is already registered
-        if (users.find(user => user.instituteId === instituteId)) {
-            return res.status(400).json({ message: 'Institute ID already registered' });
+        const existingInstitute = await User.findOne({ instituteId });
+        if (existingInstitute) {
+            return res.status(400).json({
+                message: 'Institute ID already registered'
+            });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
-        const newUser = {
-            _id: generateId(),
-            fullName,
-            email,
-            password: hashedPassword,
-            instituteId,
-            department: '',
-            roomNumber: ''
+      const newUser = new User({
+    fullName,
+    email,
+    password: hashedPassword,
+    instituteId,
+    verificationStatus: 'pending'
+});
+
+console.log("Before Save:", newUser);
+
+console.log("After Save:", newUser);
+        await newUser.save();
+
+        const userWithoutPassword = {
+            _id: newUser._id,
+            fullName: newUser.fullName,
+            email: newUser.email,
+            instituteId: newUser.instituteId
         };
 
-        users.push(newUser);
-        writeData(USERS_FILE, users);
+        res.status(201).json({
+            message: 'User registered successfully',
+            user: userWithoutPassword
+        });
 
-        // Return user without password
-        const { password: _, ...userWithoutPassword } = newUser;
-        res.status(201).json({ message: 'User registered successfully', user: userWithoutPassword });
     } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({ message: 'Error registering user' });
+        console.error(error);
+        res.status(500).json({
+            message: 'Registration failed'
+        });
     }
 });
 
@@ -157,294 +208,403 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log('Login attempt for email:', email); // Debug log
 
-        const users = readData(USERS_FILE);
-        console.log('Available users:', users.map(u => ({ email: u.email, id: u._id }))); // Debug log
+        const user = await User.findOne({ email });
 
-        // Find user
-        const user = users.find(u => u.email === email);
         if (!user) {
-            console.log('User not found with email:', email); // Debug log
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({
+                message: 'Invalid credentials'
+            });
         }
 
-        // Check password
-        const validPassword = await bcrypt.compare(password, user.password);
+        if (user.verificationStatus === 'pending') {
+            return res.status(403).json({
+                message: 'Your account is waiting for admin verification'
+            });
+        }
+
+        if (user.verificationStatus === 'rejected') {
+            return res.status(403).json({
+                message: 'Your account has been rejected'
+            });
+        }
+
+        const validPassword = await bcrypt.compare(
+            password,
+            user.password
+        );
+
         if (!validPassword) {
-            console.log('Invalid password for user:', email); // Debug log
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({
+                message: 'Invalid credentials'
+            });
         }
 
-        // Return user without password
-        const { password: _, ...userWithoutPassword } = user;
-        console.log('Login successful for user:', userWithoutPassword); // Debug log
-        res.json({ 
-            message: 'Login successful', 
-            user: userWithoutPassword 
+        const { password: _, ...userWithoutPassword } = user.toObject();
+
+        res.json({
+            message: 'Login successful',
+            user: userWithoutPassword
         });
+
     } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'Error during login' });
+        console.error(error);
+
+        res.status(500).json({
+            message: 'Server error'
+        });
     }
 });
-
 // Update user profile with photo
 app.post('/api/users/:userId/profile', upload.single('photo'), async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const { fullName, instituteId, department, roomNumber } = req.body;
-        
-        // Validate required fields
-        if (!userId) {
-            return res.status(400).json({ message: 'User ID is required' });
-        }
+try {
+const { userId } = req.params;
+const { fullName, instituteId, department, roomNumber } = req.body;
 
-        const users = readData(USERS_FILE);
-        const userIndex = users.findIndex(u => u._id === userId);
-        
-        if (userIndex === -1) {
-            return res.status(404).json({ message: 'User not found' });
-        }
 
-        // Validate institute ID if provided
-        if (instituteId && !/^\d{6}$/.test(instituteId)) {
-            return res.status(400).json({ message: 'Institute ID must be exactly 6 digits' });
-        }
-
-        // Update user data
-        const updatedUser = {
-            ...users[userIndex],
-            fullName: fullName || users[userIndex].fullName,
-            instituteId: instituteId || users[userIndex].instituteId,
-            department: department || users[userIndex].department,
-            roomNumber: roomNumber || users[userIndex].roomNumber
-        };
-
-        // If photo was uploaded, update photoUrl
-        if (req.file) {
-            const photoUrl = `/uploads/${req.file.filename}`;
-            updatedUser.photoUrl = photoUrl;
-        }
-
-        users[userIndex] = updatedUser;
-        writeData(USERS_FILE, users);
-
-        // Return updated user without password
-        const { password: _, ...userWithoutPassword } = updatedUser;
-        res.json({ message: 'Profile updated successfully', user: userWithoutPassword });
-    } catch (error) {
-        console.error('Profile update error:', error);
-        res.status(500).json({ message: 'Error updating profile: ' + error.message });
-    }
-});
-
-// Manager registration
-app.post('/api/managers/register', async (req, res) => {
-    try {
-        const { fullName, email, password } = req.body;
-        const managers = readData(MANAGERS_FILE);
-
-        // Check if manager already exists
-        if (managers.find(manager => manager.email === email)) {
-            return res.status(400).json({ message: 'Manager already exists' });
-        }
-
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create new manager
-        const newManager = {
-            _id: generateId(),
-            fullName,
-            email,
-            password: hashedPassword
-        };
-
-        managers.push(newManager);
-        writeData(MANAGERS_FILE, managers);
-
-        // Return manager without password
-        const { password: _, ...managerWithoutPassword } = newManager;
-        res.status(201).json({ message: 'Manager registered successfully', manager: managerWithoutPassword });
-    } catch (error) {
-        console.error('Manager registration error:', error);
-        res.status(500).json({ message: 'Error registering manager' });
-    }
-});
-
-// Manager login
-app.post('/api/manager/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        console.log('Manager login attempt for email:', email);
-
-        const managers = readData(MANAGERS_FILE);
-        console.log('Available managers:', managers.map(m => ({ email: m.email, id: m._id })));
-
-        // Find manager
-        const manager = managers.find(m => m.email === email);
-        if (!manager) {
-            console.log('Manager not found with email:', email);
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // Check password
-        const validPassword = await bcrypt.compare(password, manager.password);
-        if (!validPassword) {
-            console.log('Invalid password for manager:', email);
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // Return manager without password
-        const { password: _, ...managerWithoutPassword } = manager;
-        console.log('Manager login successful:', managerWithoutPassword);
-        res.json({ 
-            message: 'Login successful', 
-            manager: managerWithoutPassword 
+    if (!userId) {
+        return res.status(400).json({
+            message: 'User ID is required'
         });
-    } catch (error) {
-        console.error('Manager login error:', error);
-        res.status(500).json({ message: 'Error during login' });
     }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return res.status(404).json({
+            message: 'User not found'
+        });
+    }
+
+    if (instituteId && !/^\d{6}$/.test(instituteId)) {
+        return res.status(400).json({
+            message: 'Institute ID must be exactly 6 digits'
+        });
+    }
+
+    user.fullName = fullName || user.fullName;
+    user.instituteId = instituteId || user.instituteId;
+    user.department = department || user.department;
+    user.roomNumber = roomNumber || user.roomNumber;
+
+    if (req.file) {
+        user.photoUrl = `/uploads/${req.file.filename}`;
+    }
+
+    await user.save();
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.json({
+        message: 'Profile updated successfully',
+        user: userObj
+    });
+
+}catch (error) {
+    console.error('FULL ERROR:', error);
+
+    res.status(500).json({
+        message: error.message,
+        stack: error.stack
+    });
+}
+
+
+});
+
+//mangager registr
+app.post('/api/managers/register', async (req, res) => {
+try {
+const { fullName, email, password } = req.body;
+
+
+    const existingManager = await Manager.findOne({ email });
+
+    if (existingManager) {
+        return res.status(400).json({
+            message: 'Manager already exists'
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newManager = new Manager({
+        fullName,
+        email,
+        password: hashedPassword
+    });
+
+    await newManager.save();
+
+    const managerObj = newManager.toObject();
+    delete managerObj.password;
+
+    res.status(201).json({
+        message: 'Manager registered successfully',
+        manager: managerObj
+    });
+
+} catch (error) {
+console.error('Manager registration error:', error);
+
+
+res.status(500).json({
+    message: error.message,
+    stack: error.stack
+});
+
+}
+
+
+});
+//manager login
+app.post('/api/manager/login', async (req, res) => {
+try {
+const { email, password } = req.body;
+
+
+    const manager = await Manager.findOne({ email });
+
+    if (!manager) {
+        return res.status(401).json({
+            message: 'Invalid credentials'
+        });
+    }
+
+    const validPassword = await bcrypt.compare(
+        password,
+        manager.password
+    );
+
+    if (!validPassword) {
+        return res.status(401).json({
+            message: 'Invalid credentials'
+        });
+    }
+
+    const managerObj = manager.toObject();
+    delete managerObj.password;
+
+    res.json({
+        message: 'Login successful',
+        manager: managerObj
+    });
+
+} catch (error) {
+    console.error('Manager login error:', error);
+    res.status(500).json({
+        message: 'Error during login'
+    });
+}
+
 });
 
 // Get all users
-app.get('/api/users', (req, res) => {
-    try {
-        const users = readData(USERS_FILE);
-        res.json(users);
-    } catch (error) {
-        console.error('Error getting users:', error);
-        res.status(500).json({ message: 'Error getting users' });
-    }
+app.get('/api/users', async (req, res) => {
+try {
+const users = await User.find().select('-password');
+res.json(users);
+} catch (error) {
+console.error(error);
+res.status(500).json({
+message: 'Error getting users'
+});
+}
 });
 
-// Get all entries
-app.get('/api/entries', (req, res) => {
-    try {
-        const entries = readData(ENTRIES_FILE);
-        res.json(entries);
-    } catch (error) {
-        console.error('Error getting entries:', error);
-        res.status(500).json({ message: 'Error getting entries' });
-    }
+app.get('/api/entries', async (req, res) => {
+try {
+const entries = await Entry.find();
+res.json(entries);
+} catch (error) {
+console.error(error);
+res.status(500).json({
+message: 'Error getting entries'
+});
+}
 });
 
-// Get entries for a specific user
-app.get('/api/entries/user/:userId', (req, res) => {
-    const entries = readData(ENTRIES_FILE);
-    const userEntries = entries.filter(entry => entry.userId === req.params.userId);
-    res.json(userEntries);
+app.get('/api/entries/user/:userId', async (req, res) => {
+try {
+const entries = await Entry.find({
+userId: req.params.userId
 });
 
-// Get user verification status
-app.get('/api/users/verification/:userId', (req, res) => {
-    try {
-        const { userId } = req.params;
-        const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
-        const user = users.find(u => u._id === userId);
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+    res.json(entries);
+} catch (error) {
+    console.error(error);
+    res.status(500).json({
+        message: 'Error getting user entries'
+    });
+}
 
-        res.json({
-            verificationStatus: user.verificationStatus || 'pending',
-            verificationTimestamp: user.verificationTimestamp
+
+});
+
+app.get('/api/users/verification/:userId', async (req, res) => {
+try {
+const user = await User.findById(req.params.userId);
+
+
+    if (!user) {
+        return res.status(404).json({
+            message: 'User not found'
         });
-    } catch (error) {
-        console.error('Error getting verification status:', error);
-        res.status(500).json({ message: 'Failed to get verification status' });
     }
+
+    res.json({
+        verificationStatus: user.verificationStatus || 'pending',
+        verificationTimestamp: user.verificationTimestamp
+    });
+
+} catch (error) {
+    console.error(error);
+    res.status(500).json({
+        message: 'Failed to get verification status'
+    });
+}
+
+
 });
+
 
 // Update verification status (admin only)
-app.post('/api/users/verify/:userId', (req, res) => {
-    try {
-        const { userId } = req.params;
-        const { status, adminId } = req.body;
+app.post('/api/users/verify/:userId', async (req, res) => {
+try {
+const { userId } = req.params;
+const { status, adminId } = req.body;
 
-        if (!['verified', 'rejected'].includes(status)) {
-            return res.status(400).json({ message: 'Invalid verification status' });
-        }
 
-        const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
-        const userIndex = users.findIndex(u => u._id === userId);
+    const manager = await Manager.findById(adminId);
+    const user = await User.findById(userId);
 
-        if (userIndex === -1) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+    user.verificationStatus = status;
+    user.verifiedBy = manager._id;
+    user.verificationTimestamp = new Date();
 
-        users[userIndex].verificationStatus = status;
-        users[userIndex].verifiedBy = adminId;
-        users[userIndex].verificationTimestamp = new Date().toISOString();
+    await user.save();
 
-        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-        res.json({ message: 'Verification status updated successfully' });
-    } catch (error) {
-        console.error('Error updating verification status:', error);
-        res.status(500).json({ message: 'Failed to update verification status' });
-    }
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: user.email,
+        subject: 'Account Verification Update',
+        html: `
+            <h2>Hello ${user.fullName}</h2>
+            <p>Your account status is: <b>${status}</b></p>
+        `
+    });
+
+    res.json({
+        message: 'Verification status updated successfully'
+    });
+
+} catch (error) {
+    console.error(error);
+    res.status(500).json({
+        message: 'Failed to update verification status'
+    });
+}
+
+
 });
+
 
 // Create entry
 app.post('/api/entries', (req, res) => {
     try {
-        const { userId, session, status, name, department, roomNumber } = req.body;
-        console.log('Received entry request:', req.body);
 
-        // Validate required fields
-        if (!userId || !session || !status) {
-            return res.status(400).json({ message: 'Missing required fields' });
-        }
+        const {
+            userId,
+            session,
+            status,
+            name,
+            department,
+            roomNumber
+        } = req.body;
+
+        console.log("==============");
+        console.log("Received Body:", req.body);
+        console.log("Received userId:", userId);
 
         const entries = readData(ENTRIES_FILE);
         const users = readData(USERS_FILE);
-        const user = users.find(u => u._id === userId);
+
+        console.log("Users Count:", users.length);
+        console.log("First User:", users[0]);
+
+        const user = users.find(
+            u => String(u._id) === String(userId)
+        );
+
+        console.log("Matched User:", user);
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({
+                message: 'User not found'
+            });
         }
 
-        // Check if entry already exists for this session today
-        const today = new Date().toISOString().split('T')[0];
-        const existingEntry = entries.find(entry => 
-            entry.userId === userId && 
-            entry.session === session && 
-            entry.timestamp.startsWith(today)
+        const today = new Date()
+            .toISOString()
+            .split('T')[0];
+
+        const existingEntry = entries.find(
+            entry =>
+                entry.userId === userId &&
+                entry.session === session &&
+                entry.timestamp.startsWith(today)
         );
 
         if (existingEntry) {
-            return res.status(400).json({ message: 'Entry already exists for this session today' });
+            return res.status(400).json({
+                message:
+                'Entry already exists for this session today'
+            });
         }
 
-        // Create new entry with additional information
         const newEntry = {
             _id: generateId(),
             userId,
             session,
             status,
             name: name || user.fullName,
-            department: department || user.department,
-            roomNumber: roomNumber || user.roomNumber,
-            instituteId: user.instituteId,
-            timestamp: new Date().toISOString(),
-            date: new Date().toLocaleDateString(),
-            time: new Date().toLocaleTimeString()
+            department:
+                department || user.department,
+            roomNumber:
+                roomNumber || user.roomNumber,
+            instituteId:
+                user.instituteId,
+            timestamp:
+                new Date().toISOString(),
+            date:
+                new Date().toLocaleDateString(),
+            time:
+                new Date().toLocaleTimeString()
         };
 
         entries.push(newEntry);
-        writeData(ENTRIES_FILE, entries);
-        console.log('Entry created successfully:', newEntry);
 
-        res.status(201).json({ message: 'Entry created successfully', entry: newEntry });
+        writeData(ENTRIES_FILE, entries);
+
+        res.status(201).json({
+            message:
+            'Entry created successfully',
+            entry: newEntry
+        });
+
     } catch (error) {
-        console.error('Error creating entry:', error);
-        res.status(500).json({ message: 'Error creating entry: ' + error.message });
+
+        console.error(error);
+
+        res.status(500).json({
+            message:
+            'Error creating entry'
+        });
+
     }
 });
-
 // Reset password
 app.post('/api/reset-password', async (req, res) => {
     try {
@@ -664,11 +824,12 @@ app.put('/api/users/:userId', (req, res) => {
         }
 
         // Return updated user without password
-        const { password, ...userWithoutPassword } = updatedUser;
-        res.json({ 
-            message: 'Profile updated successfully', 
-            user: userWithoutPassword 
-        });
+      const { password: _, ...userWithoutPassword } = user.toObject();
+
+res.json({
+    message: 'Login successful',
+    user: userWithoutPassword
+});
     } catch (error) {
         console.error('Error updating user profile:', error);
         res.status(500).json({ 

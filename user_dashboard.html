@@ -8,11 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
-            --primary-color: #f32144;
-            --text-color: #333;
-            --bg-color: #f5f7fa;
+            --primary-color: #2196F3;
+            --text-color: #2c3e50;
+            --bg-color: #f0f4f8;
             --card-bg: #ffffff;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
@@ -302,7 +303,134 @@
             align-items: center;
             gap: 1rem;
         }
+        .hero-card{
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
+    border-radius:25px;
+    padding:30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
 
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.stat-card i{
+    font-size:30px;
+    color:#2196F3;
+    margin-bottom:10px;
+}
+
+.profile-dashboard-card{
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.dashboard-profile-img{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.meal-control-card{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    margin-bottom:25px;
+}
+
+.meal-row{
+    display:flex;
+    gap:20px;
+    margin-top:20px;
+}
+
+.meal-box{
+    flex:1;
+    background:#f8f9ff;
+    padding:20px;
+    border-radius:15px;
+}
+
+.button-group{
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+}
+
+.on-btn{
+    background:#4CAF50;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.off-btn{
+    background:#f44336;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.countdown-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.countdown-card{
+    background:white;
+    text-align:center;
+    padding:25px;
+    border-radius:20px;
+}
+
+@media(max-width:768px){
+
+    .stats-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .meal-row{
+        flex-direction:column;
+    }
+
+    .countdown-grid{
+        grid-template-columns:1fr;
+    }
+
+    .hero-card{
+        flex-direction:column;
+        text-align:center;
+        gap:15px;
+    }
+
+}
         .history-item-status {
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
@@ -362,78 +490,201 @@
     </nav>
 
     <div class="main-content">
-        <div class="welcome-card">
-            <h2>Welcome Back!</h2>
-            <p>Manage your meals efficiently with our easy-to-use meal tracking system.</p>
-            <a href="index.html" class="home-btn" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; background: var(--primary-color); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none;">
-                <i class="fas fa-home"></i> Go to Home
-            </a>
+
+    <!-- Hero Section -->
+    <div class="hero-card">
+        <div>
+            <h1>🍽 Welcome, <span id="heroName"></span></h1>
+            <p>Manage your hostel meals efficiently and never miss a meal.</p>
         </div>
 
-        <div class="meal-thumbnail">
-            <i class="fas fa-utensils"></i>
-            <h3>Manage Your Meals</h3>
-            <p>Click here to track and manage your daily meals</p>
-        </div>
-
-        <div class="session-toggle">
-            <div class="session-header">
-                <div class="session-title">
-                    <i class="fas fa-sun"></i>
-                    <h3>Morning Session</h3>
-                </div>
-                <span class="session-time">Before 6:30 AM</span>
-            </div>
-            <button id="morningToggle" class="toggle-btn" onclick="toggleSession('morning')">
-                <i class="fas fa-power-off"></i>
-                <span>Turn On</span>
-            </button>
-            <div id="morningStatus" class="session-status"></div>
-        </div>
-
-        <div class="session-toggle">
-            <div class="session-header">
-                <div class="session-title">
-                    <i class="fas fa-moon"></i>
-                    <h3>Evening Session</h3>
-                </div>
-                <span class="session-time">Before 6:30 PM</span>
-            </div>
-            <button id="eveningToggle" class="toggle-btn" onclick="toggleSession('evening')">
-                <i class="fas fa-power-off"></i>
-                <span>Turn On</span>
-            </button>
-            <div id="eveningStatus" class="session-status"></div>
-        </div>
-
-        <div class="history-section">
-            <div class="history-header">
-                <div class="history-title">
-                    <i class="fas fa-history"></i>
-                    <h3>Session History</h3>
-                </div>
-            </div>
-            <div id="historyList" class="history-list">
-                <!-- History items will be loaded here -->
-            </div>
+        <div class="hero-time">
+            <h2 id="currentTime"></h2>
+            <p id="currentDate"></p>
         </div>
     </div>
 
+    <!-- Stats -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <i class="fas fa-utensils"></i>
+            <h3>Total Meals</h3>
+            <h2 id="totalMeals">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-sun"></i>
+            <h3>Morning Meals</h3>
+            <h2 id="morningMeals">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-moon"></i>
+            <h3>Evening Meals</h3>
+            <h2 id="eveningMeals">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>Attendance</h3>
+            <h2 id="attendance">0%</h2>
+        </div>
+
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-dashboard-card">
+
+       <img id="dashboardProfile"
+     class="dashboard-profile-img"
+     src="">
+
+        <div>
+            <h2 id="dashboardName"></h2>
+            <p>🎓 <span id="dashboardDept"></span></p>
+            <p>🏠 Room No: <span id="dashboardRoom"></span></p>
+            <p>🟢 Student Account</p>
+        </div>
+
+    </div>
+
+    <!-- Meal Control -->
+<div class="meal-control-card">
+
+    <h2>⚙ Meal Control Center</h2>
+
+    <div class="meal-row">
+
+        <!-- Morning Meal -->
+        <div class="meal-box">
+
+            <h3>🌅 Morning Meal</h3>
+
+            <div class="button-group">
+
+                <button
+                    class="on-btn"
+                    onclick="setMeal('Morning','ON')">
+                    ON
+                </button>
+
+                <button
+                    class="off-btn"
+                    onclick="setMeal('Morning','OFF')">
+                    OFF
+                </button>
+
+            </div>
+
+            <p id="morningMealStatus">
+                Current Status: Not Selected
+            </p>
+
+            <small>
+                Available before 6:30 AM
+            </small>
+
+        </div>
+
+        <!-- Evening Meal -->
+        <div class="meal-box">
+
+            <h3>🌙 Evening Meal</h3>
+
+            <div class="button-group">
+
+                <button
+                    class="on-btn"
+                    onclick="setMeal('Evening','ON')">
+                    ON
+                </button>
+
+                <button
+                    class="off-btn"
+                    onclick="setMeal('Evening','OFF')">
+                    OFF
+                </button>
+
+            </div>
+
+            <p id="eveningMealStatus">
+                Current Status: Not Selected
+            </p>
+
+            <small>
+                Available before 6:30 PM
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+    <!-- Countdown -->
+    <div class="countdown-grid">
+
+        <div class="countdown-card">
+            <h3>⏳ Morning Closing</h3>
+            <h1 id="morningCountdown">
+                00:00:00
+            </h1>
+        </div>
+
+        <div class="countdown-card">
+            <h3>⏳ Evening Closing</h3>
+            <h1 id="eveningCountdown">
+                00:00:00
+            </h1>
+        </div>
+
+    </div>
+
+    <!-- History -->
+    <div class="history-section">
+
+        <div class="history-header">
+            <h2>📜 Meal History</h2>
+        </div>
+
+        <div id="historyList"
+             class="history-list">
+        </div>
+
+    </div>
+
+</div>
     <script>
         // Check if user is logged in
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-            window.location.href = 'login.html';
-        }
+     // Check if user is logged in
+const user = JSON.parse(localStorage.getItem('user'));
+if (!user) {
+    window.location.href = 'login.html';
+}
 
-        // Display user information
-        document.getElementById('profileName').textContent = user.fullName;
-        
-        // Set profile picture
-        const profileImg = document.getElementById('profileImg');
-        if (user.photoUrl) {
-            profileImg.src = user.photoUrl;
-        }
+// Welcome Popup (YAHAN ADD KARO)
+if (!sessionStorage.getItem('welcomeShown')) {
+    Swal.fire({
+        title: '🍽 Welcome to Meal Tracker',
+        text: `Welcome ${user.fullName}`,
+        icon: 'success',
+        confirmButtonText: 'Enter Dashboard'
+    });
+
+    sessionStorage.setItem('welcomeShown', 'true');
+}
+
+// Display user information
+document.getElementById('profileName').textContent = user.fullName;
+
+// Set profile picture
+const profileImg = document.getElementById("dashboardProfile");
+
+if(user.photoUrl){
+    profileImg.src = user.photoUrl.startsWith("http")
+        ? user.photoUrl
+        : `http://localhost:3000${user.photoUrl}`;
+}
 
         // Logout function
         function logout() {
@@ -453,8 +704,12 @@
             const eveningStart = 12 * 60; // 12:00 PM
             const eveningEnd = 18 * 60 + 30; // 6:30 PM
 
-            const morningBtn = document.getElementById('morningToggle');
-            const eveningBtn = document.getElementById('eveningToggle');
+          const morningBtn = document.getElementById('morningToggle');
+const eveningBtn = document.getElementById('eveningToggle');
+
+if (!morningBtn || !eveningBtn) {
+    return;
+}
 
             // Check if sessions are already used today
             const today = new Date().toDateString();
@@ -590,6 +845,164 @@
 
         // Load initial history
         loadHistory();
+        // ===== Dashboard User Info =====
+
+document.getElementById("heroName").textContent =
+user.fullName;
+
+document.getElementById("dashboardName").textContent =
+user.fullName;
+
+document.getElementById("dashboardDept").textContent =
+user.department || "Not Assigned";
+
+document.getElementById("dashboardRoom").textContent =
+user.roomNumber || "Not Assigned";
+
+// Profile Photo
+if(user.photoUrl){
+
+    document.getElementById("dashboardProfile").src =
+    user.photoUrl.startsWith("http")
+    ? user.photoUrl
+    : `http://localhost:3000${user.photoUrl}`;
+}
+const dashboardProfile =
+document.getElementById("dashboardProfile");
+
+if(user.photoUrl){
+
+    dashboardProfile.src =
+    user.photoUrl.startsWith("http")
+    ? user.photoUrl
+    : `http://localhost:3000${user.photoUrl}`;
+}
+// ===== Live Clock =====
+
+function updateClock(){
+
+    const now = new Date();
+
+    document.getElementById("currentTime").textContent =
+    now.toLocaleTimeString();
+
+    document.getElementById("currentDate").textContent =
+    now.toDateString();
+}
+
+updateClock();
+
+setInterval(updateClock,1000);
+
+
+// ===== Welcome Popup =====
+
+if (!sessionStorage.getItem('welcomeShown')) {
+
+    Swal.fire({
+        title: '🍽 Welcome to Meal Tracker',
+        text: `Welcome ${user.fullName}`,
+        icon: 'success',
+        confirmButtonText: 'Enter Dashboard'
+    });
+
+    sessionStorage.setItem('welcomeShown', 'true');
+}
+async function setMeal(session, status) {
+
+    const now = new Date();
+
+    const currentMinutes =
+        now.getHours() * 60 + now.getMinutes();
+
+    // Morning cutoff = 6:30 AM
+    if (
+        session === "Morning" &&
+        currentMinutes > (6 * 60 + 30)
+    ) {
+        alert("❌ Morning Meal closed after 6:30 AM");
+        return;
+    }
+
+    // Evening cutoff = 6:30 PM
+    if (
+        session === "Evening" &&
+        currentMinutes > (18 * 60 + 30)
+    ) {
+        alert("❌ Evening Meal closed after 6:30 PM");
+        return;
+    }
+
+    // Check if already submitted today
+    const sessions = await fetchUserSessions();
+
+    const today = new Date().toDateString();
+
+    const alreadySubmitted = sessions.find(
+        s =>
+            new Date(s.timestamp).toDateString() === today &&
+            s.session === session
+    );
+
+    if (alreadySubmitted) {
+
+        alert(`❌ ${session} meal already submitted today`);
+
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:3000/api/entries",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    userId: user._id,
+                    session: session,
+                    status: status,
+                    name: user.fullName,
+                    department: user.department,
+                    roomNumber: user.roomNumber
+                })
+            }
+        );
+if (!response.ok) {
+
+    const errorData = await response.text();
+
+    console.log("Backend Error:", errorData);
+
+    throw new Error(errorData);
+}
+
+alert(`✅ ${session} Meal ${status} saved`);
+
+if (session === "Morning") {
+
+    document.getElementById("morningMealStatus").innerHTML =
+        `Current Status: <strong>${status}</strong>`;
+}
+
+if (session === "Evening") {
+
+    document.getElementById("eveningMealStatus").innerHTML =
+        `Current Status: <strong>${status}</strong>`;
+}
+
+loadHistory();
+
+    } catch (error) {
+
+    console.error("ERROR:", error);
+
+    alert("❌ " + error.message);
+
+}
+}
     </script>
 </body>
 </html> 

@@ -54,5 +54,36 @@
     "instituteId": "270156",
     "department": "",
     "roomNumber": ""
+  },
+  {
+    "_id": "3f0nvclf8",
+    "fullName": "KAMAL KRISHNA MALLICK",
+    "email": "ak097809642522@gmail.com",
+    "password": "$2a$10$vOB.Cr4wAW90jrnkhqRjce4grWp3HMN676mH18OHtH4j5s9PjofwO",
+    "instituteId": "270186",
+    "department": "dets",
+    "roomNumber": "9959",
+    "photoUrl": "/uploads/photo-1749926396232-341377365.jpeg",
+    "lastUpdated": "2025-06-14T18:39:56.246Z"
+  },
+  {
+    "_id": "fpnlvek75",
+    "fullName": "jyoti",
+    "email": "kjyoti1550205@gmail.com",
+    "password": "$2a$10$PAn9.uxf0qmwP4KifQ.wtumcGfanvCvPF8R/oaw2cASd5/tQLO/Li",
+    "instituteId": "235656",
+    "department": "cse",
+    "roomNumber": "14",
+    "photoUrl": "/uploads/photo-1781266837222-944845943.png",
+    "lastUpdated": "2026-06-12T12:20:37.226Z"
+  },
+  {
+    "_id": "qp8h25mba",
+    "fullName": "jyoti singh",
+    "email": "kjyoti1502058@gmail.com",
+    "password": "$2a$10$ZXIFUIlEmU3v7RM0TN8FVuQi4tILFoEE2an.YQmJNsef/4TdaD5fO",
+    "instituteId": "235657",
+    "department": "",
+    "roomNumber": ""
   }
 ]

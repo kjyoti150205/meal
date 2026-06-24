@@ -28,5 +28,29 @@
     "fullName": "Abhinit Kumar",
     "email": "ak09780967@gmail.com",
     "password": "$2a$10$EJj/0572YHK2KsiYjK2paeQRYUWZvVsOH4DhGuvbT.7viH27nMOKS"
+  },
+  {
+    "_id": "z7bblptbr",
+    "fullName": "manager",
+    "email": "test@gmail.com",
+    "password": "$2a$10$6avsRI/2kiJyetzPVlUvXOZ3HnejKweH1X6jxkjX2A3HvyqnQZI9e"
+  },
+  {
+    "_id": "hucmvnz95",
+    "fullName": "JYOTI KUMARI",
+    "email": "kjyoti1550205@gmail.com",
+    "password": "$2a$10$j.8jU5g2Kb7D.KhOCiC1r.QMnYvF7BydwRqEy69ChxuHuyNb9CJXu"
+  },
+  {
+    "_id": "t00dni4wm",
+    "fullName": "Jyoti Singh",
+    "email": "kjyoti15502075@gmail.com",
+    "password": "$2a$10$uV3uOXQt3KvVJoLN.D/5DeJJ8NQ4CresbaegFAomQzrFsG9Y97h8O"
+  },
+  {
+    "_id": "kcuvhuafg",
+    "fullName": "Jyoti Kumari",
+    "email": "kjyoti1502058@gmail.com",
+    "password": "$2a$10$fRGr3ZLGAzQlS4JGHxzZOOSfD/djlVlMYUOd2RUx17muR52MBl3ne"
   }
 ]

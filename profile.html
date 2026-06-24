@@ -266,41 +266,53 @@
         document.getElementById('instituteId').value = user.instituteId || '';
 
         // Set profile picture
-        const profilePic = document.getElementById('profilePic');
-        if (user.photoUrl) {
-            profilePic.src = user.photoUrl;
-        }
+      const profilePic = document.getElementById('profilePic');
 
-        // Handle photo upload
-        async function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+if (user.photoUrl) {
+    profilePic.src = user.photoUrl.startsWith('http')
+        ? user.photoUrl
+        : `http://localhost:3000${user.photoUrl}`;
+}
 
-            const formData = new FormData();
-            formData.append('photo', file);
-            formData.append('userId', user._id);
+async function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-            try {
-                const response = await fetch('http://localhost:3000/api/users/upload-photo', {
-                    method: 'POST',
-                    body: formData
-                });
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('userId', user._id);
 
-                if (!response.ok) {
-                    throw new Error('Failed to upload photo');
-                }
-
-                const data = await response.json();
-                user.photoUrl = data.photoUrl;
-                localStorage.setItem('user', JSON.stringify(user));
-                profilePic.src = data.photoUrl;
-
-                showStatus('Profile picture updated successfully!', 'success');
-            } catch (error) {
-                console.error('Error uploading photo:', error);
-                showStatus('Failed to upload photo. Please try again.', 'error');
+    try {
+        const response = await fetch(
+            'http://localhost:3000/api/users/upload-photo',
+            {
+                method: 'POST',
+                body: formData
             }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Upload failed');
         }
+
+        const imageUrl = data.photoUrl.startsWith('http')
+            ? data.photoUrl
+            : `http://localhost:3000${data.photoUrl}`;
+
+        profilePic.src = imageUrl;
+
+        user.photoUrl = imageUrl;
+        localStorage.setItem('user', JSON.stringify(user));
+
+        showStatus('Profile picture updated successfully!', 'success');
+
+    } catch (error) {
+        console.error(error);
+        showStatus('Failed to upload photo', 'error');
+    }
+}
 
         // Update profile
         async function updateProfile(event) {
