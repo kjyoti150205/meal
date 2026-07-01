@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meal Tracker - Home</title>
     <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -25,31 +28,51 @@
             padding: 0;
             box-sizing: border-box;
         }
+        body{
+    font-family:'Poppins',sans-serif;
+    min-height:100vh;
+    margin:0;
+    overflow-x:hidden;
+    background:linear-gradient(135deg,#eef2ff,#dbeafe,#f8fafc);
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            position: relative;
-            background: #f5f7fa;
-            overflow-x: hidden;
-        }
+background:linear-gradient(-45deg,#f5f7fa,#dbeafe,#eef2ff,#ffffff);
+
+background-size:400% 400%;
+
+animation:bgMove 12s ease infinite;
+
+}
+
+@keyframes bgMove{
+
+0%{
+background-position:0% 50%;
+}
+
+50%{
+background-position:100% 50%;
+}
+
+100%{
+background-position:0% 50%;
+}
+
+}
+        
 
         /* Top Bar for Date and Time */
-        .top-bar {
-            width: 100%;
-            background: #2c3e50; /* Changed navbar color to dark blue */
-            padding: 15px 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            color: white;
-            display: flex;
-            justify-content: space-between; /* Adjusted to space-between for title and datetime */
-            align-items: center;
-            z-index: 100;
-            position: sticky; /* Make it sticky at the top */
-            top: 0;
-        }
+            .top-bar{
+    width:100%;
+    background:rgba(15,23,42,.95);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    padding:18px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+    border-bottom:1px solid rgba(255,255,255,.1);
+}
 
         .top-bar h2 {
             color: white;
@@ -95,44 +118,38 @@
         }
 
         /* Container adjustments */
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 40px auto; /* Adjust margin to account for top bar */
-            padding: 40px;
-            position: relative;
-            z-index: 1;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 25px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px); /* Added for Safari support */
-        }
+       .container{
+    max-width:1250px;
+    margin:45px auto;
+    padding:50px;
+    background:rgba(255,255,255,.75);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border-radius:30px;
+    border:1px solid rgba(255,255,255,.5);
+    box-shadow:0 20px 60px rgba(0,0,0,.12);
+}
 
         /* Header styling */
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-        }
+      .header{
+    text-align:center;
+    padding:40px;
+    border-radius:25px;
+    background:linear-gradient(135deg,#f43f5e,#ec4899);
+    color:white;
+    box-shadow:0 15px 40px rgba(244,63,94,.35);
+}
 
-        .header h1 {
-            font-size: 3.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.header h1{
+    color:white;
+    font-size:3.5rem;
+    margin-bottom:15px;
+}
 
-        .header p {
-            font-size: 1.2rem;
-            color:green;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
+.header p{
+    color:rgba(255,255,255,.9);
+    font-size:18px;
+}
 
         .options-grid {
             display: grid;
@@ -141,29 +158,33 @@
             margin-top: 3rem;
         }
 
-        .option-card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            text-align: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px); /* Added for Safari support */
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+        .option-card{
+    background:white;
+    border-radius:25px;
+    padding:40px 30px;
+    transition:.4s;
+    border:1px solid #ececec;
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+}
 
-        .option-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-        }
+.option-card:hover{
+    transform:translateY(-12px);
+    box-shadow:0 30px 60px rgba(0,0,0,.15);
+}
 
-        .option-card i {
-            font-size: 3.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            transition: transform 0.3s ease;
-        }
+.option-card i{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:auto;
+    background:linear-gradient(135deg,#ff416c,#ff4b2b);
+    color:white;
+    font-size:35px;
+    margin-bottom:25px;
+}
 
         .option-card:hover i {
             transform: scale(1.1);
@@ -181,35 +202,29 @@
             line-height: 1.6;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            text-decoration: none;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            color: white;
-            background: var(--primary-color);
-        }
+     .btn{
+    padding:14px 28px;
+    border-radius:12px;
+    font-weight:600;
+    transition:.35s;
+    text-decoration:none;
+    background:linear-gradient(135deg,#ff416c,#ff4b2b);
+    color:white;
+    border:none;
+}
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            background-color: #d91a3a; /* Darker shade on hover */
-        }
+.btn:hover{
+    transform:translateY(-4px);
+    box-shadow:0 15px 30px rgba(255,65,108,.35);
+}
 
-        .btn-secondary {
-            background: #6c757d; /* A common secondary color */
-        }
+.btn-secondary{
+    background:linear-gradient(135deg,#64748b,#334155);
+}
 
-        .btn-secondary:hover {
-            background: #5a6268; /* Darker shade on hover */
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
+.btn-secondary:hover{
+    box-shadow:0 15px 30px rgba(51,65,85,.3);
+}
 
         .btn-group {
             display: flex;
@@ -231,32 +246,145 @@
             }
             
         }
-        .admin-access{
-    position:absolute;
-    top:50%;
-    right:250px;
-    transform:translateY(-50%);
-}
-
-.admin-access{
-    position:absolute;
-    right:220px;
-    top:50%;
-    transform:translateY(-50%);
-}
-.top-bar a{
-    color:#ffd700;
+            .admin-access a{
+    background:#facc15;
+    color:#111827 !important;
+    padding:10px 20px;
+    border-radius:30px;
     text-decoration:none;
-    font-weight:600;
-}
-.admin-access a:visited{
-    color:#ffd700 !important;
+    font-weight:700;
+    transition:.3s;
+    box-shadow:0 8px 20px rgba(250,204,21,.35);
 }
 
 .admin-access a:hover{
-    color:#ffeb3b !important;
+    background:white;
+    color:#111827 !important;
+}.option-card{
+    animation:fadeUp .8s ease;
 }
-        
+
+@keyframes fadeUp{
+
+from{
+opacity:0;
+transform:translateY(30px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+    .option-card{
+    opacity:0;
+    transform:translateY(40px);
+    animation:cardFade .8s forwards;
+}
+
+.option-card:nth-child(1){
+    animation-delay:.2s;
+}
+
+.option-card:nth-child(2){
+    animation-delay:.5s;
+}
+
+@keyframes cardFade{
+
+0%{
+opacity:0;
+transform:translateY(40px);
+}
+
+100%{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+.option-card i{
+
+animation:float 3s ease-in-out infinite;
+
+}
+
+@keyframes float{
+
+0%{
+transform:translateY(0);
+}
+
+50%{
+transform:translateY(-8px);
+}
+
+100%{
+transform:translateY(0);
+}
+
+}    
+.btn{
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.ripple{
+
+position:absolute;
+
+width:20px;
+
+height:20px;
+
+background:rgba(255,255,255,.6);
+
+border-radius:50%;
+
+transform:scale(0);
+
+animation:ripple .6s linear;
+
+}
+
+@keyframes ripple{
+
+to{
+
+transform:scale(12);
+
+opacity:0;
+
+}
+
+}
+#welcomePopup{
+
+position:fixed;
+
+top:20px;
+
+right:20px;
+
+background:#4CAF50;
+
+color:white;
+
+padding:15px 25px;
+
+border-radius:10px;
+
+display:none;
+
+z-index:999;
+
+box-shadow:0 10px 30px rgba(0,0,0,.2);
+
+}
     </style>
 </head>
 <body>
@@ -275,9 +403,15 @@
             <div class="time" id="currentTime">Loading...</div>
         </div>
     </div>
+    <p id="typingText"></p>
+    <div id="welcomePopup">
 
+👋 Welcome to Hostel Meal Tracker
+
+</div>
     <!-- Background Design -->
     <div class="background-design"></div>
+
 
     <div class="container">
         <div class="header">
@@ -309,6 +443,66 @@
     </div>
 
     <script>
+        const text =
+"Manage your meals efficiently with our smart hostel meal tracking system.";
+
+let i=0;
+
+function typing(){
+
+if(i<text.length){
+
+document.getElementById("typingText").innerHTML+=text.charAt(i);
+
+i++;
+
+setTimeout(typing,40);
+
+}
+
+}
+
+typing();
+document.querySelectorAll(".btn").forEach(btn=>{
+
+btn.addEventListener("click",function(e){
+
+const circle=document.createElement("span");
+
+circle.classList.add("ripple");
+
+const x=e.clientX-this.offsetLeft;
+
+const y=e.clientY-this.offsetTop;
+
+circle.style.left=x+"px";
+
+circle.style.top=y+"px";
+
+this.appendChild(circle);
+
+setTimeout(()=>{
+
+circle.remove();
+
+},600);
+
+});
+
+});
+window.onload=()=>{
+
+const popup=document.getElementById("welcomePopup");
+
+popup.style.display="block";
+
+setTimeout(()=>{
+
+popup.style.display="none";
+
+},2500);
+
+}
         // Update date and time
         function updateDateTime() {
             const now = new Date();
@@ -325,11 +519,11 @@
 
         // Dynamic redirection based on login status
         const user = localStorage.getItem('user');
-        const manager = localStorage.getItem('manager');
+        const managerToken = localStorage.getItem('managerToken');
 
         if (user) {
             window.location.href = 'user_dashboard.html';
-        } else if (manager) {
+        } else if (managerToken) {
             window.location.href = 'manager_dashboard.html';
         }
     </script>

@@ -3,334 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Meal Records - Meal Tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Student Records - Meal Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2196F3;
-            --primary-dark: #1976D2;
-            --primary-light: #BBDEFB;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --text-color: #333;
-            --bg-color: #f5f7fa;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --border-radius: 12px;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-color);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 1.5rem 2rem;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-        }
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 0;
-        }
-        .home-btn {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        .home-btn:hover {
-            background: var(--primary-dark);
-        }
-        .records-container {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            overflow-x: auto;
-        }
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .month-selector button {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--primary-color);
-        }
-        .month-selector h2 {
-            font-size: 1.5rem;
-            color: var(--text-color);
-        }
-        .records-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        .records-table th, .records-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        .records-table th {
-            background: var(--primary-color);
-            color: white;
-            position: sticky;
-            top: 0;
-        }
-        .records-table tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        .meal-cell {
-            padding: 0.5rem;
-            border-radius: 4px;
-            text-align: center;
-        }
-        .meal-cell.chicken { background: #e8f5e9; }
-        .meal-cell.paneer { background: #fff3e0; }
-        .meal-cell.fish { background: #e3f2fd; }
-        .meal-cell.omelette { background: #f3e5f5; }
-        .meal-cell.manager { background: #f5f5f5; color: #666; }
-        .legend {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-        }
-        .auto-refresh {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: var(--primary-light);
-            border-radius: 8px;
-            color: var(--primary-dark);
-        }
-        .auto-refresh i {
-            animation: spin 2s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    <link rel="stylesheet" href="public/css/manager-dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Student Meal Records</h1>
-            <a href="index.html" class="home-btn"><i class="fas fa-home"></i> Home</a>
-        </div>
-        
-        <div class="records-container">
-            <div class="month-selector">
-                <button onclick="previousMonth()" title="Previous Month"><i class="fas fa-chevron-left"></i></button>
-                <h2 id="currentMonth">Month Year</h2>
-                <button onclick="nextMonth()" title="Next Month"><i class="fas fa-chevron-right"></i></button>
+    <div class="mgr-sidebar-overlay" id="mgrSidebarOverlay"></div>
+    <div class="mgr-layout">
+        <aside class="mgr-sidebar" id="mgrSidebar">
+            <div class="mgr-sidebar-brand"><i class="fas fa-utensils"></i><div><h2>Meal Tracker</h2><span>Manager Portal</span></div></div>
+            <nav class="mgr-nav">
+                <a href="manager_dashboard.html" class="mgr-nav-link" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="view_entries.html" class="mgr-nav-link" data-page="entries"><i class="fas fa-list-alt"></i> View Entries</a>
+                <a href="student_records.html" class="mgr-nav-link" data-page="records"><i class="fas fa-user-graduate"></i> Student Records</a>
+                <a href="reports.html" class="mgr-nav-link" data-page="reports"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="profile.html?role=manager" class="mgr-nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Profile</a>
+            </nav>
+            <div class="mgr-sidebar-footer">
+                <div class="mgr-user-card"><div class="mgr-user-avatar" id="mgrUserAvatar">M</div><div class="mgr-user-info"><strong id="mgrUserName">Manager</strong><small>Manager</small></div></div>
+                <button class="mgr-btn mgr-btn-outline" id="mgrLogoutBtn" style="width:100%;color:#fff;border-color:rgba(255,255,255,0.2);"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
+        </aside>
 
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #e8f5e9;"></div>
-                    <span>Chicken</span>
+        <main class="mgr-main">
+            <header class="mgr-topbar">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="mgr-menu-toggle" id="mgrMenuToggle"><i class="fas fa-bars"></i></button>
+                    <h1>Student Records</h1>
                 </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #fff3e0;"></div>
-                    <span>Paneer</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #e3f2fd;"></div>
-                    <span>Fish</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f3e5f5;"></div>
-                    <span>Omelette</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f5f5f5;"></div>
-                    <span>Manager's Choice</span>
-                </div>
-            </div>
+                <span class="mgr-refresh-badge"><i class="fas fa-database"></i> MongoDB Live</span>
+            </header>
 
-            <div class="auto-refresh">
-                <i class="fas fa-sync-alt"></i>
-                <span>Auto-refreshing every 30 seconds</span>
-            </div>
+            <div class="mgr-content">
+                <div class="mgr-card">
+                    <div class="mgr-card-body">
+                        <div class="mgr-filters">
+                            <input type="text" class="mgr-input" id="searchInput" placeholder="Search name, ID, email, room...">
+                            <input type="date" class="mgr-input" id="dateFilter" title="Historical date">
+                            <select class="mgr-select" id="departmentFilter"><option value="">All Departments</option></select>
+                            <input type="text" class="mgr-input" id="roomFilter" placeholder="Room filter">
+                            <select class="mgr-select" id="verificationFilter">
+                                <option value="">All Verification</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <select class="mgr-select" id="mealStatusFilter">
+                                <option value="">Meal Status</option>
+                                <option value="ON">ON</option>
+                                <option value="OFF">OFF</option>
+                            </select>
+                            <select class="mgr-select" id="sessionFilter">
+                                <option value="">All Sessions</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Evening">Evening</option>
+                            </select>
+                            <select class="mgr-select" id="sortBy">
+                                <option value="fullName">Sort: Name</option>
+                                <option value="department">Department</option>
+                                <option value="roomNumber">Room</option>
+                                <option value="registrationDate">Registration</option>
+                            </select>
+                            <select class="mgr-select" id="sortOrder">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+                            <button class="mgr-btn mgr-btn-primary" onclick="loadStudents(1)"><i class="fas fa-search"></i> Search</button>
+                            <button class="mgr-btn mgr-btn-outline" onclick="resetFilters()"><i class="fas fa-undo"></i> Reset</button>
+                        </div>
+                    </div>
+                </div>
 
-            <div style="overflow-x: auto;">
-                <table class="records-table">
-                    <thead>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Room No.</th>
-                            <th id="datesHeader"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentRecords">
-                        <!-- Student records will be populated here -->
-                    </tbody>
-                </table>
+                <div class="mgr-card">
+                    <div class="mgr-card-header">
+                        <h2><i class="fas fa-table"></i> All Students <small id="recordCount" style="font-weight:400;color:var(--mgr-text-muted);"></small></h2>
+                        <button class="mgr-btn mgr-btn-outline mgr-btn-sm" onclick="loadStudents(currentPage)"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                    <div class="mgr-card-body mgr-table-wrap">
+                        <table class="mgr-table">
+                            <thead>
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Name</th>
+                                    <th>Institute ID</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th>Room</th>
+                                    <th>Verification</th>
+                                    <th>Morning</th>
+                                    <th>Evening</th>
+                                    <th>Registered</th>
+                                    <th>Updated</th>
+                                    <th>History</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsBody">
+                                <tr><td colspan="12"><div class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div></td></tr>
+                            </tbody>
+                        </table>
+                        <div class="mgr-pagination" id="pagination"></div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 
+    <script src="public/js/manager-common.js"></script>
     <script>
-        let currentDate = new Date();
-        let lastUpdate = new Date();
+        let currentPage = 1;
 
-        // Function to get all registered students from localStorage
-        function getRegisteredStudents() {
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            return users.filter(user => user.role === 'student').map(user => ({
-                id: user.id,
-                name: user.fullName,
-                room: user.room || 'N/A'
-            }));
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('departmentFilter').value = '';
+            document.getElementById('roomFilter').value = '';
+            document.getElementById('verificationFilter').value = '';
+            document.getElementById('mealStatusFilter').value = '';
+            document.getElementById('sessionFilter').value = '';
+            loadStudents(1);
         }
 
-        function pad(n) { return n < 10 ? '0' + n : n; }
+        function buildQuery(page) {
+            const params = new URLSearchParams({ page, limit: 20 });
+            const search = document.getElementById('searchInput').value.trim();
+            const date = document.getElementById('dateFilter').value;
+            const department = document.getElementById('departmentFilter').value;
+            const room = document.getElementById('roomFilter').value;
+            const verification = document.getElementById('verificationFilter').value;
+            const mealStatus = document.getElementById('mealStatusFilter').value;
+            const session = document.getElementById('sessionFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            const sortOrder = document.getElementById('sortOrder').value;
 
-        function generateCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const monthStr = `${year}-${pad(month+1)}`;
-            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
-            
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const totalDays = lastDay.getDate();
-            
-            // Generate date headers
-            const datesHeader = document.getElementById('datesHeader');
-            datesHeader.innerHTML = '';
-            for (let day = 1; day <= totalDays; day++) {
-                const date = new Date(year, month, day);
-                const dayOfWeek = date.getDay();
-                const isWednesday = dayOfWeek === 3;
-                const isSunday = dayOfWeek === 0;
-                
-                const th = document.createElement('th');
-                th.textContent = `${day}${isWednesday ? ' (Wed)' : isSunday ? ' (Sun)' : ''}`;
-                th.style.backgroundColor = isWednesday || isSunday ? '#e8f5e9' : '#f5f5f5';
-                datesHeader.appendChild(th);
-            }
-            
-            // Get students from localStorage
-            const students = getRegisteredStudents();
-            
-            // Generate student records
-            const tbody = document.getElementById('studentRecords');
-            tbody.innerHTML = '';
-            
-            students.forEach(student => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${student.name}</td>
-                    <td>${student.room}</td>
-                `;
-                
-                for (let day = 1; day <= totalDays; day++) {
-                    const date = new Date(year, month, day);
-                    const dayOfWeek = date.getDay();
-                    const isWednesday = dayOfWeek === 3;
-                    const isSunday = dayOfWeek === 0;
-                    
-                    const td = document.createElement('td');
-                    td.className = 'meal-cell';
-                    
-                    if (isWednesday || isSunday) {
-                        // Get meal preference from localStorage
-                        const dateString = `${year}-${pad(month+1)}-${pad(day)}`;
-                        const meal = localStorage.getItem(`meal_${student.id}_${dateString}`) || '';
-                        
-                        if (meal) {
-                            td.textContent = meal;
-                            td.classList.add(meal.toLowerCase());
-                        } else {
-                            td.textContent = 'Not Selected';
-                            td.style.background = '#ffebee';
-                        }
-                    } else {
-                        td.textContent = "Manager's Choice";
-                        td.classList.add('manager');
-                    }
-                    row.appendChild(td);
+            if (search) params.set('search', search);
+            if (department) params.set('department', department);
+            if (room) params.set('room', room);
+            if (verification) params.set('verification', verification);
+            if (mealStatus) params.set('mealStatus', mealStatus);
+            if (session) params.set('session', session);
+            params.set('sortBy', sortBy);
+            params.set('sortOrder', sortOrder);
+
+            const endpoint = date ? `/api/manager/student-records?date=${date}&${params}` : `/api/manager/students?${params}`;
+            return { endpoint, date };
+        }
+
+        async function loadStudents(page = 1) {
+            currentPage = page;
+            showLoading(true);
+            try {
+                const { endpoint, date } = buildQuery(page);
+                const data = await managerFetch(endpoint);
+
+                document.getElementById('recordCount').textContent = `(${data.total} students)`;
+                const tbody = document.getElementById('studentsBody');
+
+                const students = data.students || [];
+                if (!students.length) {
+                    tbody.innerHTML = '<tr><td colspan="12"><div class="mgr-empty"><i class="fas fa-user-graduate"></i><p>No students found</p></div></td></tr>';
+                } else {
+                    tbody.innerHTML = students.map((s) => {
+                        const photo = studentPhotoUrl(s.photoUrl);
+                        const photoHtml = photo
+                            ? `<img class="mgr-student-photo" src="${photo}" alt="">`
+                            : `<div class="mgr-student-photo-placeholder">${getInitials(s.fullName || s.name)}</div>`;
+                        const name = s.fullName || s.name;
+                        return `<tr>
+                            <td>${photoHtml}</td>
+                            <td>${escapeHtml(name)}</td>
+                            <td>${escapeHtml(s.instituteId || '—')}</td>
+                            <td>${escapeHtml(s.email || '—')}</td>
+                            <td>${escapeHtml(s.department || '—')}</td>
+                            <td>${escapeHtml(s.roomNumber || s.room || '—')}</td>
+                            <td>${statusBadge(s.verificationStatus || 'approved')}</td>
+                            <td>${statusBadge(s.morningStatus)}</td>
+                            <td>${statusBadge(s.eveningStatus)}</td>
+                            <td>${formatDate(s.registrationDate || s.date)}</td>
+                            <td>${formatDateTime(s.lastUpdated || s.morningTime || s.eveningTime)}</td>
+                            <td><button class="mgr-btn mgr-btn-outline mgr-btn-sm" onclick="viewHistory('${s._id}','${escapeHtml(name)}')"><i class="fas fa-history"></i></button></td>
+                        </tr>`;
+                    }).join('');
                 }
-                tbody.appendChild(row);
-            });
 
-            // Update last update time
-            lastUpdate = new Date();
-        }
+                renderPagination('pagination', data.page, data.totalPages, loadStudents);
 
-        function previousMonth() {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            generateCalendar();
-        }
-
-        function nextMonth() {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            generateCalendar();
-        }
-
-        // Function to check for changes in localStorage
-        function checkForChanges() {
-            const currentTime = new Date();
-            if (currentTime - lastUpdate >= 30000) { // Check every 30 seconds
-                generateCalendar();
+                if (!date) {
+                    const depts = [...new Set(students.map((s) => s.department).filter((d) => d && d !== '—'))];
+                    const deptSelect = document.getElementById('departmentFilter');
+                    const current = deptSelect.value;
+                    deptSelect.innerHTML = '<option value="">All Departments</option>' +
+                        depts.map((d) => `<option value="${escapeHtml(d)}" ${d === current ? 'selected' : ''}>${escapeHtml(d)}</option>`).join('');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                showLoading(false);
             }
         }
 
-        // Initialize the calendar
-        document.addEventListener('DOMContentLoaded', generateCalendar);
-
-        // Set up storage event listener for real-time updates
-        window.addEventListener('storage', function(e) {
-            if (e.key && e.key.startsWith('meal_')) {
-                generateCalendar();
+        async function viewHistory(userId, name) {
+            try {
+                const data = await managerFetch(`/api/manager/meal-history/${userId}`);
+                const lines = data.history.slice(0, 30).map((h) =>
+                    `${h.date}: Morning ${h.morning || '—'} | Evening ${h.evening || '—'}`
+                ).join('\n');
+                alert(`Meal History — ${name}\n\n${lines || 'No history found'}`);
+            } catch (error) {
+                showToast(error.message, 'error');
             }
-        });
+        }
 
-        // Check for changes periodically
-        setInterval(checkForChanges, 5000); // Check every 5 seconds
+        if (checkManagerAuth()) {
+            initSidebar('records');
+            loadStudents(1);
+            setInterval(() => loadStudents(currentPage), 30000);
+        }
     </script>
 </body>
 </html>

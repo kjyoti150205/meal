@@ -84,16 +84,20 @@ router.post('/approve/:userId', async (req, res) => {
         user.verificationTimestamp = new Date();
         await user.save();
 
-        await sendApprovalEmail(user.email, user.fullName);
+        await sendApprovalEmail(user);
 
         res.json({
             message: 'User approved successfully',
             user: formatUser(user)
         });
     } catch (error) {
-        console.error('Approve user error:', error);
-        res.status(500).json({ message: 'Failed to approve user' });
-    }
+    console.error("ERROR MESSAGE:", error.message);
+    console.error("ERROR STACK:", error.stack);
+
+    res.status(500).json({
+        message: error.message
+    });
+}
 });
 
 router.post('/reject/:userId', async (req, res) => {
@@ -118,17 +122,22 @@ router.post('/reject/:userId', async (req, res) => {
         user.verifiedBy = req.admin.id;
         user.verificationTimestamp = new Date();
         await user.save();
-
-        await sendRejectionEmail(user.email, user.fullName);
+await sendRejectionEmail(user);
 
         res.json({
             message: 'User rejected successfully',
             user: formatUser(user)
         });
     } catch (error) {
-        console.error('Reject user error:', error);
-        res.status(500).json({ message: 'Failed to reject user' });
-    }
+    console.error("========== ERROR ==========");
+    console.error(error);
+    console.error(error.stack);
+
+    res.status(500).json({
+        message: error.message,
+        stack: error.stack
+    });
+}
 });
 
 module.exports = router;

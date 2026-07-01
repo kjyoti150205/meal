@@ -410,6 +410,17 @@
     border-radius:20px;
 }
 
+.session-badge{
+    padding:0.25rem 0.75rem;
+    border-radius:999px;
+    font-size:0.75rem;
+    font-weight:600;
+}
+.session-badge.open{background:#e8f5e9;color:#4CAF50;}
+.session-badge.closed{background:#ffebee;color:#f44336;}
+
+.on-btn:disabled,.off-btn:disabled{opacity:0.45;cursor:not-allowed;}
+
 @media(max-width:768px){
 
     .stats-grid{
@@ -471,16 +482,22 @@
     <nav class="navbar">
         <h1>Meal Tracker</h1>
         <div class="nav-links">
-            <a href="index.html" class="nav-link">
-                <i class="fas fa-home"></i>
-                Home
-            </a>
+            <a href="/index.html" class="nav-link">
+    <i class="fas fa-home"></i>
+    Home
+</a>
+            
             <a href="#" class="nav-link">
                 <i class="fas fa-history"></i>
                 History
             </a>
             <a href="profile.html" class="profile-section">
-                <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img" id="profileImg">
+                
+             <img
+    src="images/default-profile.png"
+    alt="Profile"
+    class="profile-img"
+    id="profileImg">
                 <span class="profile-name" id="profileName">Loading...</span>
             </a>
             <button onclick="logout()" style="background: #f44336; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-family: inherit; font-weight: 500; transition: all 0.3s ease;">
@@ -556,66 +573,30 @@
 
     <div class="meal-row">
 
-        <!-- Morning Meal -->
         <div class="meal-box">
-
-            <h3>🌅 Morning Meal</h3>
-
-            <div class="button-group">
-
-                <button
-                    class="on-btn"
-                    onclick="setMeal('Morning','ON')">
-                    ON
-                </button>
-
-                <button
-                    class="off-btn"
-                    onclick="setMeal('Morning','OFF')">
-                    OFF
-                </button>
-
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h3>🌅 Morning Meal</h3>
+                <span id="morningBadge" class="session-badge open">Open</span>
             </div>
-
-            <p id="morningMealStatus">
-                Current Status: Not Selected
-            </p>
-
-            <small>
-                Available before 6:30 AM
-            </small>
-
+            <div class="button-group">
+                <button class="on-btn" id="morningOnBtn" onclick="setMeal('Morning','ON')">ON</button>
+                <button class="off-btn" id="morningOffBtn" onclick="setMeal('Morning','OFF')">OFF</button>
+            </div>
+            <p id="morningMealStatus">Current Status: Not Selected</p>
+            <small>Open 6:30 PM → Closes 6:30 AM (locked)</small>
         </div>
 
-        <!-- Evening Meal -->
         <div class="meal-box">
-
-            <h3>🌙 Evening Meal</h3>
-
-            <div class="button-group">
-
-                <button
-                    class="on-btn"
-                    onclick="setMeal('Evening','ON')">
-                    ON
-                </button>
-
-                <button
-                    class="off-btn"
-                    onclick="setMeal('Evening','OFF')">
-                    OFF
-                </button>
-
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h3>🌙 Evening Meal</h3>
+                <span id="eveningBadge" class="session-badge open">Open</span>
             </div>
-
-            <p id="eveningMealStatus">
-                Current Status: Not Selected
-            </p>
-
-            <small>
-                Available before 6:30 PM
-            </small>
-
+            <div class="button-group">
+                <button class="on-btn" id="eveningOnBtn" onclick="setMeal('Evening','ON')">ON</button>
+                <button class="off-btn" id="eveningOffBtn" onclick="setMeal('Evening','OFF')">OFF</button>
+            </div>
+            <p id="eveningMealStatus">Current Status: Not Selected</p>
+            <small>Open 6:30 AM → Closes 6:30 PM (locked)</small>
         </div>
 
     </div>
@@ -624,21 +605,30 @@
     <!-- Countdown -->
     <div class="countdown-grid">
 
-        <div class="countdown-card">
-            <h3>⏳ Morning Closing</h3>
-            <h1 id="morningCountdown">
-                00:00:00
-            </h1>
-        </div>
+    <div class="countdown-card">
+        <h3>🌅 Morning Meal</h3>
 
-        <div class="countdown-card">
-            <h3>⏳ Evening Closing</h3>
-            <h1 id="eveningCountdown">
-                00:00:00
-            </h1>
-        </div>
+        <h1 id="morningCountdown">
+            00:00:00
+        </h1>
+
+        <p id="morningMessage"></p>
 
     </div>
+
+    <div class="countdown-card">
+
+        <h3>🌙 Evening Meal</h3>
+
+        <h1 id="eveningCountdown">
+            00:00:00
+        </h1>
+
+        <p id="eveningMessage"></p>
+
+    </div>
+
+</div>
 
     <!-- History -->
     <div class="history-section">
@@ -655,354 +645,166 @@
 
 </div>
     <script>
-        // Check if user is logged in
-     // Check if user is logged in
+const API = window.location.origin;
 const user = JSON.parse(localStorage.getItem('user'));
-if (!user) {
+if (!user) window.location.href = 'login.html';
+
+let sessionData = null;
+
+function formatMs(ms) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function photoSrc(url) {
+    if (!url) return 'images/default-profile.png';
+    return url.startsWith('http') ? url : `${API}${url}`;
+}
+
+function logout() {
+    localStorage.removeItem('user');
+    localStorage.removeItem('userToken');
     window.location.href = 'login.html';
 }
 
-// Welcome Popup (YAHAN ADD KARO)
-if (!sessionStorage.getItem('welcomeShown')) {
-    Swal.fire({
-        title: '🍽 Welcome to Meal Tracker',
-        text: `Welcome ${user.fullName}`,
-        icon: 'success',
-        confirmButtonText: 'Enter Dashboard'
+function updateSessionUI(key, sessionInfo) {
+    const prefix = key === 'morning' ? 'morning' : 'evening';
+    const countdown = document.getElementById(`${prefix}Countdown`);
+    const message = document.getElementById(`${prefix}Message`);
+    const badge = document.getElementById(`${prefix}Badge`);
+    const onBtn = document.getElementById(`${prefix}OnBtn`);
+    const offBtn = document.getElementById(`${prefix}OffBtn`);
+
+    if (sessionInfo.open) {
+        countdown.textContent = formatMs(sessionInfo.closesInMs);
+        message.innerHTML = '✅ Meal Open — change anytime until lock';
+        message.style.color = 'green';
+        badge.textContent = 'Open';
+        badge.className = 'session-badge open';
+        onBtn.disabled = false;
+        offBtn.disabled = false;
+    } else {
+        countdown.textContent = '00:00:00';
+        message.innerHTML = '❌ Session Closed — locked';
+        message.style.color = 'red';
+        badge.textContent = 'Closed';
+        badge.className = 'session-badge closed';
+        onBtn.disabled = true;
+        offBtn.disabled = true;
+    }
+}
+
+async function refreshSessionState() {
+    try {
+        const res = await fetch(`${API}/api/entries/user/${user._id}/today`);
+        sessionData = await res.json();
+        updateSessionUI('morning', sessionData.sessionStatus.morning);
+        updateSessionUI('evening', sessionData.sessionStatus.evening);
+
+        const mStatus = document.getElementById('morningMealStatus');
+        const eStatus = document.getElementById('eveningMealStatus');
+        mStatus.innerHTML = sessionData.morning
+            ? `Current Status: <strong>${sessionData.morning.status}</strong>`
+            : 'Current Status: Not Selected';
+        eStatus.innerHTML = sessionData.evening
+            ? `Current Status: <strong>${sessionData.evening.status}</strong>`
+            : 'Current Status: Not Selected';
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function tickCountdown() {
+    if (!sessionData?.sessionStatus) return;
+    ['morning', 'evening'].forEach((key) => {
+        const s = sessionData.sessionStatus[key];
+        if (s.open && s.closesInMs > 0) {
+            s.closesInMs = Math.max(0, s.closesInMs - 1000);
+            updateSessionUI(key, s);
+        }
     });
-
-    sessionStorage.setItem('welcomeShown', 'true');
 }
 
-// Display user information
-document.getElementById('profileName').textContent = user.fullName;
-
-// Set profile picture
-const profileImg = document.getElementById("dashboardProfile");
-
-if(user.photoUrl){
-    profileImg.src = user.photoUrl.startsWith("http")
-        ? user.photoUrl
-        : `http://localhost:3000${user.photoUrl}`;
+async function fetchUserSessions() {
+    const res = await fetch(`${API}/api/entries/user/${user._id}`);
+    return res.ok ? res.json() : [];
 }
 
-        // Logout function
-        function logout() {
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
-        }
-
-        // Session management
-        async function checkSessionTime() {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const currentTime = hours * 60 + minutes;
-            
-            const morningStart = 0; // 12:00 AM
-            const morningEnd = 6 * 60 + 30; // 6:30 AM
-            const eveningStart = 12 * 60; // 12:00 PM
-            const eveningEnd = 18 * 60 + 30; // 6:30 PM
-
-          const morningBtn = document.getElementById('morningToggle');
-const eveningBtn = document.getElementById('eveningToggle');
-
-if (!morningBtn || !eveningBtn) {
-    return;
+async function loadHistory() {
+    const historyList = document.getElementById('historyList');
+    const sessions = await fetchUserSessions();
+    if (!sessions.length) {
+        historyList.innerHTML = '<div class="history-item">No meal history found.</div>';
+        return;
+    }
+    const grouped = {};
+    sessions.forEach((s) => {
+        if (!grouped[s.mealDate]) grouped[s.mealDate] = { date: s.mealDate, morning: '—', evening: '—' };
+        if (s.session === 'Morning') grouped[s.mealDate].morning = s.status;
+        if (s.session === 'Evening') grouped[s.mealDate].evening = s.status;
+    });
+    historyList.innerHTML = Object.values(grouped)
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 30)
+        .map((h) => `
+            <div class="history-item">
+                <div><strong>${h.date}</strong> — Morning: ${h.morning} | Evening: ${h.evening}</div>
+            </div>
+        `).join('');
 }
 
-            // Check if sessions are already used today
-            const today = new Date().toDateString();
-            const sessions = await fetchUserSessions();
-            const todaySessions = sessions.filter(s => new Date(s.date).toDateString() === today);
+async function setMeal(session, status) {
+    try {
+        const res = await fetch(`${API}/api/entries`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: user._id,
+                session,
+                status,
+                name: user.fullName,
+                department: user.department,
+                roomNumber: user.roomNumber
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to save');
 
-            // Morning session
-            if (currentTime >= morningStart && currentTime <= morningEnd) {
-                const morningSession = todaySessions.find(s => s.sessionType === 'morning');
-                if (morningSession) {
-                    morningBtn.disabled = true;
-                    updateSessionStatus('morning', 'closed', 'Morning session already used today');
-                } else {
-                    morningBtn.disabled = false;
-                    updateSessionStatus('morning', 'active', 'Session is open');
-                }
-            } else {
-                morningBtn.disabled = true;
-                updateSessionStatus('morning', 'closed', 'Morning session is closed');
-            }
-
-            // Evening session
-            if (currentTime >= eveningStart && currentTime <= eveningEnd) {
-                const eveningSession = todaySessions.find(s => s.sessionType === 'evening');
-                if (eveningSession) {
-                    eveningBtn.disabled = true;
-                    updateSessionStatus('evening', 'closed', 'Evening session already used today');
-                } else {
-                    eveningBtn.disabled = false;
-                    updateSessionStatus('evening', 'active', 'Session is open');
-                }
-            } else {
-                eveningBtn.disabled = true;
-                updateSessionStatus('evening', 'closed', 'Evening session is closed');
-            }
-        }
-
-        async function toggleSession(session) {
-            const btn = document.getElementById(`${session}Toggle`);
-            const status = document.getElementById(`${session}Status`);
-            
-            try {
-                const response = await fetch(`http://localhost:3000/api/entries`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userId: user._id,
-                        session: session.charAt(0).toUpperCase() + session.slice(1),
-                        status: btn.classList.contains('active') ? 'OFF' : 'ON',
-                        name: user.fullName,
-                        department: user.department,
-                        roomNumber: user.roomNumber
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to save session');
-                }
-
-                if (btn.classList.contains('active')) {
-                    btn.classList.remove('active');
-                    btn.querySelector('span').textContent = 'Turn On';
-                    updateSessionStatus(session, 'inactive', `${session.charAt(0).toUpperCase() + session.slice(1)} session is off`);
-                } else {
-                    btn.classList.add('active');
-                    btn.querySelector('span').textContent = 'Turn Off';
-                    updateSessionStatus(session, 'active', `${session.charAt(0).toUpperCase() + session.slice(1)} session is on`);
-                }
-
-                // Update history
-                loadHistory();
-            } catch (error) {
-                console.error('Error toggling session:', error);
-                showStatus('Error saving session. Please try again.', 'error');
-            }
-        }
-
-        function updateSessionStatus(session, type, message) {
-            const status = document.getElementById(`${session}Status`);
-            status.className = `session-status ${type}`;
-            status.textContent = message;
-        }
-
-        async function fetchUserSessions() {
-            try {
-                const response = await fetch(`http://localhost:3000/api/entries`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch sessions');
-                }
-                const entries = await response.json();
-                // Filter entries for current user
-                return entries.filter(entry => entry.userId === user._id);
-            } catch (error) {
-                console.error('Error fetching sessions:', error);
-                return [];
-            }
-        }
-
-        async function loadHistory() {
-            const sessions = await fetchUserSessions();
-            const historyList = document.getElementById('historyList');
-            historyList.innerHTML = '';
-
-            // Sort sessions by date (newest first)
-            sessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            sessions.forEach(session => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
-                historyItem.innerHTML = `
-                    <div class="history-item-info">
-                        <i class="fas ${session.session === 'Morning' ? 'fa-sun' : 'fa-moon'}"></i>
-                        <div>
-                            <div>${session.session} Session</div>
-                            <div style="font-size: 0.8rem; color: #666;">
-                                ${new Date(session.timestamp).toLocaleDateString()} ${new Date(session.timestamp).toLocaleTimeString()}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="history-item-status ${session.status.toLowerCase()}">
-                        ${session.status}
-                    </div>
-                `;
-                historyList.appendChild(historyItem);
-            });
-        }
-
-        // Check session times every minute
-        checkSessionTime();
-        setInterval(checkSessionTime, 60000);
-
-        // Load initial history
+        Swal.fire({ icon: 'success', title: `${session} Meal ${status}`, timer: 1500, showConfirmButton: false });
+        await refreshSessionState();
         loadHistory();
-        // ===== Dashboard User Info =====
-
-document.getElementById("heroName").textContent =
-user.fullName;
-
-document.getElementById("dashboardName").textContent =
-user.fullName;
-
-document.getElementById("dashboardDept").textContent =
-user.department || "Not Assigned";
-
-document.getElementById("dashboardRoom").textContent =
-user.roomNumber || "Not Assigned";
-
-// Profile Photo
-if(user.photoUrl){
-
-    document.getElementById("dashboardProfile").src =
-    user.photoUrl.startsWith("http")
-    ? user.photoUrl
-    : `http://localhost:3000${user.photoUrl}`;
+    } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+    }
 }
-const dashboardProfile =
-document.getElementById("dashboardProfile");
 
-if(user.photoUrl){
-
-    dashboardProfile.src =
-    user.photoUrl.startsWith("http")
-    ? user.photoUrl
-    : `http://localhost:3000${user.photoUrl}`;
-}
-// ===== Live Clock =====
-
-function updateClock(){
-
+function updateClock() {
     const now = new Date();
+    document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+    document.getElementById('currentDate').textContent = now.toDateString();
+}
 
-    document.getElementById("currentTime").textContent =
-    now.toLocaleTimeString();
+document.getElementById('profileName').textContent = user.fullName;
+document.getElementById('heroName').textContent = user.fullName;
+document.getElementById('dashboardName').textContent = user.fullName;
+document.getElementById('dashboardDept').textContent = user.department || 'Not Assigned';
+document.getElementById('dashboardRoom').textContent = user.roomNumber || 'Not Assigned';
+document.getElementById('dashboardProfile').src = photoSrc(user.photoUrl);
+document.getElementById('profileImg').src = photoSrc(user.photoUrl);
 
-    document.getElementById("currentDate").textContent =
-    now.toDateString();
+if (!sessionStorage.getItem('welcomeShown')) {
+    Swal.fire({ title: '🍽 Welcome to Meal Tracker', text: `Welcome ${user.fullName}`, icon: 'success', confirmButtonText: 'Enter Dashboard' });
+    sessionStorage.setItem('welcomeShown', 'true');
 }
 
 updateClock();
-
-setInterval(updateClock,1000);
-
-
-// ===== Welcome Popup =====
-
-if (!sessionStorage.getItem('welcomeShown')) {
-
-    Swal.fire({
-        title: '🍽 Welcome to Meal Tracker',
-        text: `Welcome ${user.fullName}`,
-        icon: 'success',
-        confirmButtonText: 'Enter Dashboard'
-    });
-
-    sessionStorage.setItem('welcomeShown', 'true');
-}
-async function setMeal(session, status) {
-
-    const now = new Date();
-
-    const currentMinutes =
-        now.getHours() * 60 + now.getMinutes();
-
-    // Morning cutoff = 6:30 AM
-    if (
-        session === "Morning" &&
-        currentMinutes > (6 * 60 + 30)
-    ) {
-        alert("❌ Morning Meal closed after 6:30 AM");
-        return;
-    }
-
-    // Evening cutoff = 6:30 PM
-    if (
-        session === "Evening" &&
-        currentMinutes > (18 * 60 + 30)
-    ) {
-        alert("❌ Evening Meal closed after 6:30 PM");
-        return;
-    }
-
-    // Check if already submitted today
-    const sessions = await fetchUserSessions();
-
-    const today = new Date().toDateString();
-
-    const alreadySubmitted = sessions.find(
-        s =>
-            new Date(s.timestamp).toDateString() === today &&
-            s.session === session
-    );
-
-    if (alreadySubmitted) {
-
-        alert(`❌ ${session} meal already submitted today`);
-
-        return;
-    }
-
-    try {
-
-        const response = await fetch(
-            "http://localhost:3000/api/entries",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    userId: user._id,
-                    session: session,
-                    status: status,
-                    name: user.fullName,
-                    department: user.department,
-                    roomNumber: user.roomNumber
-                })
-            }
-        );
-if (!response.ok) {
-
-    const errorData = await response.text();
-
-    console.log("Backend Error:", errorData);
-
-    throw new Error(errorData);
-}
-
-alert(`✅ ${session} Meal ${status} saved`);
-
-if (session === "Morning") {
-
-    document.getElementById("morningMealStatus").innerHTML =
-        `Current Status: <strong>${status}</strong>`;
-}
-
-if (session === "Evening") {
-
-    document.getElementById("eveningMealStatus").innerHTML =
-        `Current Status: <strong>${status}</strong>`;
-}
-
+setInterval(updateClock, 1000);
+refreshSessionState();
+setInterval(refreshSessionState, 30000);
+setInterval(tickCountdown, 1000);
 loadHistory();
-
-    } catch (error) {
-
-    console.error("ERROR:", error);
-
-    alert("❌ " + error.message);
-
-}
-}
     </script>
 </body>
 </html> 

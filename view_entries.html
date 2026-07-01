@@ -4,308 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Entries - Meal Tracker</title>
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #f32144;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --text-color: #333;
-            --bg-color: #f5f7fa;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-color);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-        }
-
-        .back-btn {
-            padding: 0.8rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .back-btn:hover {
-            background-color: #d91a3a;
-        }
-
-        .entries-table {
-            width: 100%;
-            background: var(--card-bg);
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .entries-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .entries-table th,
-        .entries-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        .entries-table th {
-            background: var(--primary-color);
-            color: white;
-            font-weight: 500;
-        }
-
-        .entries-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .delete-btn {
-            padding: 0.5rem 1rem;
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .delete-btn:hover {
-            background-color: #d32f2f;
-        }
-
-        .status-on {
-            color: var(--success-color);
-            font-weight: 500;
-        }
-
-        .status-off {
-            color: var(--danger-color);
-            font-weight: 500;
-        }
-
-        .no-entries {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-
-        .filter-section {
-            margin-bottom: 1.5rem;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .filter-input {
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            flex: 1;
-        }
-
-        .filter-btn {
-            padding: 0.8rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .filter-btn:hover {
-            background-color: #d91a3a;
-        }
-    </style>
+    <link rel="stylesheet" href="public/css/manager-dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>View Entries</h1>
-            <a href="manager_dashboard.html" class="back-btn">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
-        </div>
+    <div class="mgr-sidebar-overlay" id="mgrSidebarOverlay"></div>
 
-        <div class="filter-section">
-            <input type="text" class="filter-input" id="searchInput" placeholder="Search by name, department, or room number...">
-            <select class="filter-input" id="sessionFilter" aria-label="Filter by session">
-                <option value="">All Sessions</option>
-                <option value="Morning">Morning</option>
-                <option value="Evening">Evening</option>
-            </select>
-            <button class="filter-btn" onclick="applyFilters()">
-                <i class="fas fa-filter"></i> Filter
-            </button>
-        </div>
+    <div class="mgr-layout">
+        <aside class="mgr-sidebar" id="mgrSidebar">
+            <div class="mgr-sidebar-brand">
+                <i class="fas fa-utensils"></i>
+                <div><h2>Meal Tracker</h2><span>Manager Portal</span></div>
+            </div>
+            <nav class="mgr-nav">
+                <a href="manager_dashboard.html" class="mgr-nav-link" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="view_entries.html" class="mgr-nav-link" data-page="entries"><i class="fas fa-list-alt"></i> View Entries</a>
+                <a href="student_records.html" class="mgr-nav-link" data-page="records"><i class="fas fa-user-graduate"></i> Student Records</a>
+                <a href="reports.html" class="mgr-nav-link" data-page="reports"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="profile.html?role=manager" class="mgr-nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Profile</a>
+            </nav>
+            <div class="mgr-sidebar-footer">
+                <div class="mgr-user-card">
+                    <div class="mgr-user-avatar" id="mgrUserAvatar">M</div>
+                    <div class="mgr-user-info"><strong id="mgrUserName">Manager</strong><small>Manager</small></div>
+                </div>
+                <button class="mgr-btn mgr-btn-outline" id="mgrLogoutBtn" style="width:100%;color:#fff;border-color:rgba(255,255,255,0.2);"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
 
-        <div class="entries-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Department</th>
-                        <th>Room Number</th>
-                        <th>Session</th>
-                        <th>Status</th>
-                        <th>Timestamp</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="entriesTableBody">
-                    <!-- Entries will be populated here -->
-                </tbody>
-            </table>
-        </div>
+        <main class="mgr-main">
+            <header class="mgr-topbar">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="mgr-menu-toggle" id="mgrMenuToggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+                    <h1>View Entries</h1>
+                </div>
+            </header>
+
+            <div class="mgr-content">
+                <div class="mgr-card">
+                    <div class="mgr-card-header"><h2>Meal Entries</h2></div>
+                    <div class="mgr-card-body">
+                        <div class="mgr-filters">
+                            <input type="text" class="mgr-input" id="searchInput" placeholder="Search name, department, room...">
+                            <select class="mgr-select" id="sessionFilter">
+                                <option value="">All Sessions</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Evening">Evening</option>
+                            </select>
+                            <button class="mgr-btn mgr-btn-primary" onclick="applyFilters()"><i class="fas fa-filter"></i> Filter</button>
+                            <button class="mgr-btn mgr-btn-outline" onclick="loadEntries()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        </div>
+                        <div class="mgr-table-wrap">
+                            <table class="mgr-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Room</th>
+                                        <th>Session</th>
+                                        <th>Status</th>
+                                        <th>Timestamp</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entriesTableBody">
+                                    <tr><td colspan="7"><div class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading entries...</p></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
+    <script src="public/js/manager-common.js"></script>
     <script>
-        // Check if manager is logged in
-        function checkAuth() {
-            const manager = JSON.parse(localStorage.getItem('manager'));
-            if (!manager) {
-                window.location.href = 'manager_login.html';
-            }
-        }
+        let allEntries = [];
 
-        // Load entries
         async function loadEntries() {
             try {
-                const response = await fetch('http://localhost:3000/api/entries');
-                const entries = await response.json();
-                displayEntries(entries);
+                allEntries = await managerFetch('/api/manager/entries');
+                displayEntries(allEntries);
             } catch (error) {
-                console.error('Error loading entries:', error);
+                document.getElementById('entriesTableBody').innerHTML =
+                    `<tr><td colspan="7"><div class="mgr-empty"><i class="fas fa-exclamation-circle"></i><p>${escapeHtml(error.message)}</p></div></td></tr>`;
             }
         }
 
-        // Display entries in table
         function displayEntries(entries) {
             const tableBody = document.getElementById('entriesTableBody');
-            tableBody.innerHTML = '';
 
             if (entries.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="no-entries">
-                            No entries found
-                        </td>
-                    </tr>
-                `;
+                tableBody.innerHTML = '<tr><td colspan="7"><div class="mgr-empty"><i class="fas fa-inbox"></i><p>No entries found</p></div></td></tr>';
                 return;
             }
 
-            entries.forEach(entry => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${entry.name}</td>
-                    <td>${entry.department}</td>
-                    <td>${entry.roomNumber}</td>
-                    <td>${entry.session}</td>
-                    <td class="status-${entry.status.toLowerCase()}">${entry.status}</td>
-                    <td>${new Date(entry.timestamp).toLocaleString()}</td>
+            tableBody.innerHTML = entries.map((entry) => `
+                <tr>
+                    <td>${escapeHtml(entry.name)}</td>
+                    <td>${escapeHtml(entry.department || '—')}</td>
+                    <td>${escapeHtml(entry.roomNumber || '—')}</td>
+                    <td>${escapeHtml(entry.session)}</td>
+                    <td><span class="mgr-badge ${(entry.status || '').toLowerCase() === 'on' ? 'success' : 'danger'}">${escapeHtml(entry.status)}</span></td>
+                    <td>${formatDateTime(entry.timestamp)}</td>
                     <td>
-                        <button class="delete-btn" onclick="deleteEntry('${entry._id}')">
+                        <button class="mgr-btn mgr-btn-danger mgr-btn-sm" onclick="deleteEntry('${entry._id}')">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </td>
-                `;
-                tableBody.appendChild(row);
-            });
+                </tr>
+            `).join('');
         }
 
-        // Delete entry
         async function deleteEntry(entryId) {
-            if (!confirm('Are you sure you want to delete this entry?')) {
-                return;
-            }
+            if (!confirm('Are you sure you want to delete this entry?')) return;
 
             try {
-                const response = await fetch(`http://localhost:3000/api/entries/${entryId}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to delete entry');
-                }
-
-                // Reload entries after successful deletion
-                loadEntries();
+                await managerFetch(`/api/manager/entries/${entryId}`, { method: 'DELETE' });
+                await loadEntries();
             } catch (error) {
-                console.error('Error deleting entry:', error);
-                alert('Failed to delete entry. Please try again.');
+                alert(error.message);
             }
         }
 
-        // Apply filters
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const sessionFilter = document.getElementById('sessionFilter').value;
 
-            const rows = document.querySelectorAll('#entriesTableBody tr');
-            rows.forEach(row => {
-                const name = row.cells[0]?.textContent.toLowerCase() || '';
-                const department = row.cells[1]?.textContent.toLowerCase() || '';
-                const roomNumber = row.cells[2]?.textContent.toLowerCase() || '';
-                const session = row.cells[3]?.textContent || '';
-
-                const matchesSearch = name.includes(searchTerm) || 
-                                   department.includes(searchTerm) || 
-                                   roomNumber.includes(searchTerm);
-                const matchesSession = !sessionFilter || session === sessionFilter;
-
-                row.style.display = matchesSearch && matchesSession ? '' : 'none';
+            const filtered = allEntries.filter((entry) => {
+                const matchesSearch = !searchTerm ||
+                    (entry.name || '').toLowerCase().includes(searchTerm) ||
+                    (entry.department || '').toLowerCase().includes(searchTerm) ||
+                    (entry.roomNumber || '').toLowerCase().includes(searchTerm);
+                const matchesSession = !sessionFilter || entry.session === sessionFilter;
+                return matchesSearch && matchesSession;
             });
+
+            displayEntries(filtered);
         }
 
-        // Initialize page
-        function init() {
-            checkAuth();
+        if (checkManagerAuth()) {
+            initSidebar('entries');
             loadEntries();
         }
-
-        // Run initialization
-        init();
     </script>
 </body>
-</html> 
+</html>

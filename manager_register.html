@@ -4,344 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Registration - Meal Tracker</title>
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #f32144;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --text-color: #333;
-            --bg-color: #f5f7fa;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-color);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            position: relative;
-        }
-
-        .back-button {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .back-button:hover {
-            transform: translateX(-5px);
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .logo i {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--text-color);
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(243, 33, 68, 0.1);
-        }
-
-        .password-toggle {
-            position: relative;
-        }
-
-        .password-toggle i {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #666;
-        }
-
-        button[type="submit"] {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        button[type="submit"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(243, 33, 68, 0.2);
-        }
-
-        .login-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-color);
-        }
-
-        .login-link a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        #status {
-            text-align: center;
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 10px;
-            font-weight: 500;
-            display: none;
-        }
-
-        #status.success {
-            display: block;
-            background-color: #e8f5e9;
-            color: var(--success-color);
-        }
-
-        #status.error {
-            display: block;
-            background-color: #ffebee;
-            color: var(--danger-color);
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-
-            .card {
-                padding: 1.5rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="public/css/manager-auth.css">
 </head>
-<body>
-    <div class="container">
-        <div class="card">
-            <div class="header">
-                <h1>Meal Tracker</h1>
-                <a href="index.html" class="home-btn" style="background: var(--primary-color); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-home"></i> Home
-                </a>
+<body class="mgr-auth-page">
+    <div class="mgr-auth-container">
+        <a href="index.html" class="mgr-auth-back">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        <div class="mgr-auth-card">
+            <div class="mgr-auth-logo">
+                <div class="icon-circle"><i class="fas fa-user-shield"></i></div>
+                <h1>Manager Registration</h1>
+                <p>Create your manager account</p>
             </div>
-            <button class="back-button" onclick="window.location.href='index.html'" title="Go back to home page">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-user-shield"></i>
-            </div>
-            <h1>Manager Registration</h1>
-            <form id="registerForm" onsubmit="return handleRegister(event)">
+            <form id="registerForm" class="mgr-auth-form" onsubmit="return handleRegister(event)">
                 <div class="form-group">
                     <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name">
+                    <input type="text" id="fullName" required placeholder="Enter your full name">
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="manager@example.com">
+                </div>
+                <div class="mgr-form-row">
+                    <div class="form-group">
+                        <label for="managerId">Manager ID</label>
+                        <input type="text" id="managerId" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="mgr-form-row">
+                    <div class="form-group">
+                        <label for="hostelName">Hostel Name</label>
+                        <input type="text" id="hostelName" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label for="designation">Designation</label>
+                        <input type="text" id="designation" placeholder="Optional">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <div class="password-toggle">
-                        <input type="password" id="password" name="password" required placeholder="Enter your password">
-                        <i class="fas fa-eye" onclick="togglePassword()"></i>
+                    <div class="mgr-password-wrap">
+                        <input type="password" id="password" required placeholder="Min. 6 characters">
+                        <button type="button" class="mgr-password-toggle" onclick="togglePassword('password', this)" aria-label="Toggle password">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
-                    <div class="password-toggle">
-                        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password">
-                        <i class="fas fa-eye" onclick="toggleConfirmPassword()"></i>
+                    <div class="mgr-password-wrap">
+                        <input type="password" id="confirmPassword" required placeholder="Confirm password">
+                        <button type="button" class="mgr-password-toggle" onclick="togglePassword('confirmPassword', this)" aria-label="Toggle confirm password">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
-                <button type="submit">
+                <button type="submit" class="mgr-auth-submit" id="submitBtn">
                     <i class="fas fa-user-plus"></i> Register as Manager
                 </button>
             </form>
-            <div class="login-link">
+            <div id="status" class="mgr-auth-status"></div>
+            <div class="mgr-auth-links">
                 Already have an account? <a href="manager_login.html">Login here</a>
             </div>
-            <div id="status"></div>
         </div>
     </div>
 
     <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const icon = document.querySelector('.password-toggle i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+        const API_BASE = window.location.origin;
+
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
 
-        function toggleConfirmPassword() {
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            const icon = document.querySelectorAll('.password-toggle i')[1];
-            
-            if (confirmPasswordInput.type === 'password') {
-                confirmPasswordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                confirmPasswordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `mgr-auth-status ${type}`;
         }
 
         async function handleRegister(event) {
             event.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
 
             const fullName = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const managerId = document.getElementById('managerId').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const hostelName = document.getElementById('hostelName').value.trim();
+            const designation = document.getElementById('designation').value.trim();
 
-            // Validate passwords match
             if (password !== confirmPassword) {
-                showError('Passwords do not match');
+                showStatus('Passwords do not match', 'error');
                 return;
             }
 
-            // Validate password length
             if (password.length < 6) {
-                showError('Password must be at least 6 characters long');
+                showStatus('Password must be at least 6 characters long', 'error');
                 return;
             }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
 
             try {
-                const response = await fetch('http://localhost:3000/api/managers/register', {
+                const response = await fetch(`${API_BASE}/api/manager/register`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        fullName,
-                        email,
-                        password
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, password, managerId, phone, hostelName, designation })
                 });
 
+                const data = await response.json();
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Registration failed');
+                    showStatus(data.message || 'Registration failed', 'error');
+                    return;
                 }
 
-                const data = await response.json();
-                showSuccess('Registration successful! Redirecting to login...');
-                setTimeout(() => {
-                    window.location.href = 'manager_login.html';
-                }, 2000);
+                showStatus(data.message || 'Registration successful! Redirecting to login...', 'success');
+                setTimeout(() => { window.location.href = 'manager_login.html'; }, 2500);
             } catch (error) {
-                console.error('Error:', error);
-                showError(error.message || 'An error occurred. Please try again.');
+                showStatus(error.message || 'An error occurred. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register as Manager';
             }
-        }
-
-        function showError(message) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = 'error';
-            statusDiv.style.display = 'block';
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        function showSuccess(message) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = 'success';
-            statusDiv.style.display = 'block';
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-            }, 3000);
         }
     </script>
 </body>
-</html> 
+</html>

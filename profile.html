@@ -193,176 +193,264 @@
         .upload-pic input[type="file"] {
             display: none;
         }
+        .upload-pic{
+    margin-top:15px;
+    text-align:center;
+}
+
+.upload-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 18px;
+    background:#4CAF50;
+    color:#fff;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.3s;
+}
+
+.upload-btn:hover{
+    background:#388E3C;
+}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Profile Settings</h1>
-            <a href="user_dashboard.html" class="back-btn">
+
+            <a href="user_dashboard.html" class="back-btn" id="backLink">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
         </div>
 
         <div class="profile-card">
+
             <div class="profile-header">
-                <img src="https://via.placeholder.com/120" alt="Profile Picture" class="profile-pic" id="profilePic">
+
+                <img
+                    src="images/default-profile.png"
+                    alt="Profile Picture"
+                    class="profile-pic"
+                    id="profilePic">
+
                 <div class="profile-info">
                     <h2 id="userName">Loading...</h2>
                     <p id="userEmail">Loading...</p>
                 </div>
+
             </div>
 
             <form id="profileForm" onsubmit="return updateProfile(event)">
-                <div class="form-group">
-                    <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="fullName" required>
-                </div>
 
                 <div class="form-group">
-                    <label for="department">Department</label>
-                    <input type="text" id="department" name="department" required>
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="roomNumber">Room Number</label>
-                    <input type="text" id="roomNumber" name="roomNumber" required>
+                <div class="form-group" id="deptGroup">
+                    <label>Department</label>
+                    <input type="text" id="department">
                 </div>
 
-                <div class="form-group">
-                    <label for="instituteId">Institute ID</label>
-                    <input type="text" id="instituteId" name="instituteId">
+                <div class="form-group" id="roomGroup">
+                    <label>Room Number</label>
+                    <input type="text" id="roomNumber">
+                </div>
+
+                <div class="form-group" id="instituteGroup">
+                    <label>Institute ID</label>
+                    <input type="text" id="instituteId">
+                </div>
+
+                <div class="form-group" id="phoneGroup" style="display:none;">
+                    <label>Phone</label>
+                    <input type="text" id="phone">
+                </div>
+
+                <div class="form-group" id="hostelGroup" style="display:none;">
+                    <label>Hostel Name</label>
+                    <input type="text" id="hostelName">
                 </div>
 
                 <div class="upload-pic">
-                    <label for="photoUpload">
-                        <i class="fas fa-camera"></i> Change Profile Picture
+
+                    <label for="photoUpload" class="upload-btn">
+                        <i class="fas fa-camera"></i>
+                        Change Profile Picture
                     </label>
-                    <input type="file" id="photoUpload" accept="image/*" onchange="handlePhotoUpload(event)">
+
+                    <input
+                        type="file"
+                        id="photoUpload"
+                        accept="image/png,image/jpeg,image/jpg"
+                        onchange="handlePhotoUpload(event)"
+                        hidden>
+
                 </div>
 
-                <button type="submit" class="save-btn">
-                    <i class="fas fa-save"></i> Save Changes
+                <button class="save-btn" type="submit">
+                    <i class="fas fa-save"></i>
+                    Save Changes
                 </button>
+
             </form>
 
             <div id="status"></div>
+
         </div>
     </div>
 
-    <script>
-        // Check if user is logged in
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-            window.location.href = 'login.html';
-        }
+<script>
 
-        // Load user data
-        document.getElementById('userName').textContent = user.fullName || 'Not set';
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('fullName').value = user.fullName || '';
-        document.getElementById('department').value = user.department || '';
-        document.getElementById('roomNumber').value = user.roomNumber || '';
-        document.getElementById('instituteId').value = user.instituteId || '';
+const isManager = new URLSearchParams(window.location.search).get('role') === 'manager';
+const user = isManager ? null : JSON.parse(localStorage.getItem("user") || 'null');
+const manager = isManager ? JSON.parse(localStorage.getItem("manager") || 'null') : null;
+const managerToken = localStorage.getItem('managerToken');
 
-        // Set profile picture
-      const profilePic = document.getElementById('profilePic');
-
-if (user.photoUrl) {
-    profilePic.src = user.photoUrl.startsWith('http')
-        ? user.photoUrl
-        : `http://localhost:3000${user.photoUrl}`;
+if (isManager) {
+    if (!managerToken || !manager) {
+        alert("Please login first");
+        window.location.href = "manager_login.html";
+    }
+} else if (!user) {
+    alert("Please login first");
+    window.location.href = "login.html";
 }
 
-async function handlePhotoUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+const account = isManager ? manager : user;
+const API = window.location.origin;
 
+const profilePic = document.getElementById("profilePic");
+
+function showStatus(message, type = "success") {
+
+    const status = document.getElementById("status");
+
+    status.innerHTML = message;
+
+    status.style.color = type === "success" ? "green" : "red";
+
+    setTimeout(() => {
+
+        status.innerHTML = "";
+
+    },3000);
+
+}
+
+window.onload = function(){
+    if (isManager) {
+        document.querySelector('.header h1').textContent = 'Manager Profile';
+        document.getElementById('backLink').href = 'manager_dashboard.html';
+        document.getElementById('deptGroup').querySelector('label').textContent = 'Designation';
+        document.getElementById('roomGroup').style.display = 'none';
+        document.getElementById('instituteGroup').style.display = 'none';
+        document.getElementById('phoneGroup').style.display = 'block';
+        document.getElementById('hostelGroup').style.display = 'block';
+    }
+
+    document.getElementById("userName").innerText = account.fullName || "";
+    document.getElementById("userEmail").innerText = account.email || "";
+    document.getElementById("fullName").value = account.fullName || "";
+
+    if (isManager) {
+        document.getElementById("department").value = account.designation || "";
+        document.getElementById("phone").value = account.phone || "";
+        document.getElementById("hostelName").value = account.hostelName || "";
+    } else {
+        document.getElementById("department").value = account.department || "";
+        document.getElementById("roomNumber").value = account.roomNumber || "";
+        document.getElementById("instituteId").value = account.instituteId || "";
+    }
+
+    if(account.photoUrl){
+        profilePic.src = account.photoUrl.startsWith("http")
+            ? account.photoUrl
+            : `${API}${account.photoUrl}`;
+    }
+};
+
+async function handlePhotoUpload(event){
+    const file = event.target.files[0];
+    if(!file) return;
     const formData = new FormData();
-    formData.append('photo', file);
-    formData.append('userId', user._id);
+    formData.append("photo", file);
+    if (!isManager) formData.append("fullName", account.fullName);
 
     try {
-        const response = await fetch(
-            'http://localhost:3000/api/users/upload-photo',
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
-
+        const url = isManager
+            ? `${API}/api/manager/profile`
+            : `${API}/api/users/${account._id}`;
+        const response = await fetch(url, {
+            method: isManager ? "PUT" : "PUT",
+            headers: isManager ? { Authorization: `Bearer ${managerToken}` } : {},
+            body: formData
+        });
         const data = await response.json();
+        if(!response.ok) throw new Error(data.message || "Upload failed");
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Upload failed');
+        const updated = isManager ? data.manager : data.user;
+        if (isManager) localStorage.setItem('manager', JSON.stringify(updated));
+        else localStorage.setItem('user', JSON.stringify(updated));
+
+        if(updated.photoUrl){
+            profilePic.src = updated.photoUrl.startsWith("http")
+                ? updated.photoUrl : `${API}${updated.photoUrl}`;
         }
-
-        const imageUrl = data.photoUrl.startsWith('http')
-            ? data.photoUrl
-            : `http://localhost:3000${data.photoUrl}`;
-
-        profilePic.src = imageUrl;
-
-        user.photoUrl = imageUrl;
-        localStorage.setItem('user', JSON.stringify(user));
-
-        showStatus('Profile picture updated successfully!', 'success');
-
-    } catch (error) {
-        console.error(error);
-        showStatus('Failed to upload photo', 'error');
+        showStatus("Profile picture updated successfully!","success");
+    } catch(error) {
+        showStatus(error.message,"error");
     }
 }
 
-        // Update profile
-        async function updateProfile(event) {
-            event.preventDefault();
-            const status = document.getElementById('status');
+async function updateProfile(event){
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("fullName", document.getElementById("fullName").value);
 
-            const updatedUser = {
-                ...user,
-                fullName: document.getElementById('fullName').value,
-                department: document.getElementById('department').value,
-                roomNumber: document.getElementById('roomNumber').value,
-                instituteId: document.getElementById('instituteId').value
-            };
+    if (isManager) {
+        formData.append("designation", document.getElementById("department").value);
+        formData.append("phone", document.getElementById("phone").value);
+        formData.append("hostelName", document.getElementById("hostelName").value);
+    } else {
+        formData.append("department", document.getElementById("department").value);
+        formData.append("roomNumber", document.getElementById("roomNumber").value);
+        formData.append("instituteId", document.getElementById("instituteId").value);
+    }
 
-            try {
-                console.log('Sending update request:', updatedUser);
-                const response = await fetch(`http://localhost:3000/api/users/${user._id}/profile`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedUser)
-                });
+    const photo = document.getElementById("photoUpload").files[0];
+    if(photo) formData.append("photo", photo);
 
-                const data = await response.json();
-                console.log('Server response:', data);
+    try {
+        const url = isManager
+            ? `${API}/api/manager/profile`
+            : `${API}/api/users/${account._id}/profile`;
+        const response = await fetch(url, {
+            method: isManager ? "PUT" : "POST",
+            headers: isManager ? { Authorization: `Bearer ${managerToken}` } : {},
+            body: formData
+        });
+        const data = await response.json();
+        if(!response.ok) throw new Error(data.message || "Update Failed");
 
-                if (!response.ok) {
-                    throw new Error(data.message || 'Failed to update profile');
-                }
+        const updated = isManager ? data.manager : data.user;
+        if (isManager) localStorage.setItem('manager', JSON.stringify(updated));
+        else localStorage.setItem('user', JSON.stringify(updated));
 
-                localStorage.setItem('user', JSON.stringify(data.user));
-                showStatus('Profile updated successfully!', 'success');
-
-                // Update displayed name
-                document.getElementById('userName').textContent = data.user.fullName;
-            } catch (error) {
-                console.error('Error updating profile:', error);
-                showStatus(error.message || 'Failed to update profile. Please try again.', 'error');
-            }
+        document.getElementById("userName").innerText = updated.fullName;
+        if(updated.photoUrl){
+            profilePic.src = updated.photoUrl.startsWith("http")
+                ? updated.photoUrl : `${API}${updated.photoUrl}`;
         }
+        showStatus("Profile updated successfully!","success");
+    } catch(error) {
+        showStatus(error.message,"error");
+    }
+}
 
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = type;
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 3000);
-        }
-    </script>
+</script>
 </body>
 </html> 

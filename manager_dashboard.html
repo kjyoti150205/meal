@@ -4,253 +4,232 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard - Meal Tracker</title>
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2196F3;
-            --primary-dark: #1976D2;
-            --primary-light: #BBDEFB;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --text-color: #333;
-            --bg-color: #f5f7fa;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --border-radius: 12px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-color);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 1.5rem 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary-color);
-        }
-
-        .user-name {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        .welcome-message {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .welcome-message h2 {
-            color: var(--text-color);
-            margin-bottom: 1rem;
-        }
-
-        .welcome-message p {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .action-button {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .action-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            background: var(--primary-light);
-        }
-
-        .action-button i {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-        }
-
-        .action-button h3 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        .action-button p {
-            color: #666;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .home-btn {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .home-btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .logout-btn {
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .logout-btn:hover {
-            background: #d32f2f;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .user-info {
-                flex-direction: column;
-            }
-
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="public/css/manager-dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Meal Tracker</h1>
-            <div class="user-info">
-                <a href="index.html" class="btn home-btn">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <img id="profilePic" src="" alt="Profile Picture" class="profile-pic">
-                <span id="userName" class="user-name">Loading...</span>
-                <button onclick="logout()" class="btn logout-btn">
+    <div class="mgr-sidebar-overlay" id="mgrSidebarOverlay"></div>
+
+    <div class="mgr-layout">
+        <aside class="mgr-sidebar" id="mgrSidebar">
+            <div class="mgr-sidebar-brand">
+                <i class="fas fa-utensils"></i>
+                <div>
+                    <h2>Meal Tracker</h2>
+                    <span>Manager Portal</span>
+                </div>
+            </div>
+            <nav class="mgr-nav">
+                <a href="manager_dashboard.html" class="mgr-nav-link" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="view_entries.html" class="mgr-nav-link" data-page="entries"><i class="fas fa-list-alt"></i> View Entries</a>
+                <a href="student_records.html" class="mgr-nav-link" data-page="records"><i class="fas fa-user-graduate"></i> Student Records</a>
+                <a href="reports.html" class="mgr-nav-link" data-page="reports"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="profile.html?role=manager" class="mgr-nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Profile</a>
+            </nav>
+            <div class="mgr-sidebar-footer">
+                <div class="mgr-user-card">
+                    <div class="mgr-user-avatar" id="mgrUserAvatar">M</div>
+                    <div class="mgr-user-info">
+                        <strong id="mgrUserName">Manager</strong>
+                        <small>Manager</small>
+                    </div>
+                </div>
+                <button class="mgr-btn mgr-btn-outline" id="mgrLogoutBtn" style="width:100%;color:#fff;border-color:rgba(255,255,255,0.2);">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
-        </div>
+        </aside>
 
-        <div class="welcome-message">
-            <h2>Welcome to the Manager Dashboard</h2>
-            <p>Manage meal entries, view student records, and generate reports from this central hub.</p>
-        </div>
+        <main class="mgr-main">
+            <header class="mgr-topbar">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="mgr-menu-toggle" id="mgrMenuToggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="mgr-topbar-actions">
+                    <span class="mgr-live-pill" id="livePill"><span class="dot"></span> Live</span>
+                    <a href="index.html" class="mgr-btn mgr-btn-outline"><i class="fas fa-home"></i> Home</a>
+                </div>
+            </header>
 
-        <div class="action-buttons">
-            <a href="view_entries.html" class="action-button">
-                <i class="fas fa-utensils"></i>
-                <h3>View Entries</h3>
-                <p>View and manage meal entries</p>
-            </a>
-            <a href="student_records.html" class="action-button">
-                <i class="fas fa-user-graduate"></i>
-                <h3>Student Records</h3>
-                <p>View student meal preferences and history</p>
-            </a>
-            <a href="reports.html" class="action-button">
-                <i class="fas fa-chart-bar"></i>
-                <h3>Generate Reports</h3>
-                <p>Create and download meal reports</p>
-            </a>
-        </div>
+            <div class="mgr-content">
+                <div class="mgr-stats-grid dense" id="statsGrid">
+                    <div class="mgr-stat-card glass-indigo">
+                        <div class="icon-wrap indigo"><i class="fas fa-users"></i></div>
+                        <div class="label">Total Students</div>
+                        <div class="value" id="statTotalStudents">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-green">
+                        <div class="icon-wrap green"><i class="fas fa-user-check"></i></div>
+                        <div class="label">Verified Students</div>
+                        <div class="value" id="statVerified">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-amber">
+                        <div class="icon-wrap amber"><i class="fas fa-clock"></i></div>
+                        <div class="label">Pending Students</div>
+                        <div class="value" id="statPending">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-red">
+                        <div class="icon-wrap indigo"><i class="fas fa-user-times"></i></div>
+                        <div class="label">Rejected Students</div>
+                        <div class="value" id="statRejected">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-cyan">
+                        <div class="icon-wrap cyan"><i class="fas fa-sun"></i></div>
+                        <div class="label">Morning Meal ON</div>
+                        <div class="value" id="statMorningOn">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-red">
+                        <div class="icon-wrap amber"><i class="fas fa-sun"></i></div>
+                        <div class="label">Morning Meal OFF</div>
+                        <div class="value" id="statMorningOff">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-green">
+                        <div class="icon-wrap green"><i class="fas fa-moon"></i></div>
+                        <div class="label">Evening Meal ON</div>
+                        <div class="value" id="statEveningOn">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-red">
+                        <div class="icon-wrap indigo"><i class="fas fa-moon"></i></div>
+                        <div class="label">Evening Meal OFF</div>
+                        <div class="value" id="statEveningOff">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-indigo">
+                        <div class="icon-wrap indigo"><i class="fas fa-utensils"></i></div>
+                        <div class="label">Total Active Meals</div>
+                        <div class="value" id="statActiveMeals">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-cyan">
+                        <div class="icon-wrap cyan"><i class="fas fa-percentage"></i></div>
+                        <div class="label">Attendance %</div>
+                        <div class="value" id="statAttendance">—</div>
+                    </div>
+                    <div class="mgr-stat-card glass-green">
+                        <div class="icon-wrap green"><i class="fas fa-broadcast-tower"></i></div>
+                        <div class="label">Live Meal Count</div>
+                        <div class="value" id="statLiveCount">—</div>
+                    </div>
+                </div>
+
+                <div class="mgr-grid-2">
+                    <div class="mgr-card">
+                        <div class="mgr-card-header">
+                            <h2><i class="fas fa-clock"></i> Session Status</h2>
+                        </div>
+                        <div class="mgr-card-body" id="sessionStatusCards">
+                            <div class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>
+                        </div>
+                    </div>
+                    <div class="mgr-card">
+                        <div class="mgr-card-header"><h2><i class="fas fa-chart-pie"></i> Today's Meals</h2></div>
+                        <div class="mgr-card-body"><div id="mealChart"></div></div>
+                    </div>
+                </div>
+
+                <div class="mgr-card">
+                    <div class="mgr-card-header">
+                        <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                        <a href="view_entries.html" class="mgr-btn mgr-btn-primary mgr-btn-sm">View All</a>
+                    </div>
+                    <div class="mgr-card-body mgr-table-wrap">
+                        <table class="mgr-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Session</th>
+                                    <th>Status</th>
+                                    <th>Department</th>
+                                    <th>Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentEntriesBody">
+                                <tr><td colspan="5" class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
+    <script src="public/js/manager-common.js"></script>
     <script>
-        // Check if manager is logged in
-        const manager = JSON.parse(localStorage.getItem('manager'));
-        if (!manager) {
-            window.location.href = 'manager_login.html';
-        }
+        if (checkManagerAuth()) {
+            initSidebar('dashboard');
 
-        // Display manager information
-        document.getElementById('userName').textContent = manager.fullName;
-        
-        // Set profile picture
-        const profilePic = document.getElementById('profilePic');
-        if (manager.photoUrl) {
-            profilePic.src = manager.photoUrl;
-        } else {
-            profilePic.src = 'https://via.placeholder.com/40';
-        }
+            function renderSessionCards(status) {
+                const el = document.getElementById('sessionStatusCards');
+                const sessions = [
+                    { key: 'morning', label: 'Morning Meal', icon: 'fa-sun' },
+                    { key: 'evening', label: 'Evening Meal', icon: 'fa-moon' }
+                ];
 
-        // Logout function
-        function logout() {
-            localStorage.removeItem('manager');
-            window.location.href = 'manager_login.html';
+                el.innerHTML = sessions.map(({ key, label, icon }) => {
+                    const s = status[key];
+                    const pillClass = s.open ? '' : 'closed';
+                    const pillText = s.open ? 'Open' : 'Closed';
+                    const countdown = s.open ? formatMs(s.closesInMs) : 'Locked';
+                    return `
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;background:rgba(99,102,241,0.06);border-radius:10px;margin-bottom:0.75rem;">
+                            <div><i class="fas ${icon}" style="color:var(--mgr-primary);margin-right:0.5rem;"></i><strong>${label}</strong>
+                            <div style="font-size:0.8rem;color:var(--mgr-text-muted);margin-top:0.25rem;">Date: ${s.mealDate}</div></div>
+                            <div style="text-align:right;">
+                                <span class="mgr-live-pill ${pillClass}"><span class="dot"></span> ${pillText}</span>
+                                <div style="font-size:1.25rem;font-weight:700;margin-top:0.35rem;font-variant-numeric:tabular-nums;">${countdown}</div>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+
+            async function loadDashboard() {
+                showLoading(true);
+                try {
+                    const stats = await managerFetch('/api/manager/dashboard/stats');
+
+                    document.getElementById('statTotalStudents').textContent = stats.totalStudents;
+                    document.getElementById('statVerified').textContent = stats.verifiedStudents;
+                    document.getElementById('statPending').textContent = stats.pendingStudents;
+                    document.getElementById('statRejected').textContent = stats.rejectedStudents;
+                    document.getElementById('statMorningOn').textContent = stats.todayMorningOn;
+                    document.getElementById('statMorningOff').textContent = stats.todayMorningOff;
+                    document.getElementById('statEveningOn').textContent = stats.todayEveningOn;
+                    document.getElementById('statEveningOff').textContent = stats.todayEveningOff;
+                    document.getElementById('statActiveMeals').textContent = stats.totalActiveMeals;
+                    document.getElementById('statAttendance').textContent = stats.attendancePercent + '%';
+                    document.getElementById('statLiveCount').textContent = stats.liveMealCount;
+
+                    renderSessionCards(stats.sessionStatus);
+                    renderDonutChart('mealChart', {
+                        'Morning ON': stats.todayMorningOn,
+                        'Morning OFF': stats.todayMorningOff,
+                        'Evening ON': stats.todayEveningOn,
+                        'Evening OFF': stats.todayEveningOff
+                    });
+
+                    const tbody = document.getElementById('recentEntriesBody');
+                    if (!stats.recentEntries?.length) {
+                        tbody.innerHTML = '<tr><td colspan="5"><div class="mgr-empty"><i class="fas fa-inbox"></i><p>No entries yet</p></div></td></tr>';
+                    } else {
+                        tbody.innerHTML = stats.recentEntries.map((entry) => `
+                            <tr>
+                                <td>${escapeHtml(entry.name)}</td>
+                                <td>${escapeHtml(entry.session)}</td>
+                                <td>${statusBadge(entry.status)}</td>
+                                <td>${escapeHtml(entry.department || '—')}</td>
+                                <td>${formatDateTime(entry.updatedAt || entry.timestamp)}</td>
+                            </tr>
+                        `).join('');
+                    }
+                } catch (error) {
+                    showToast(error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+
+            loadDashboard();
+            setInterval(loadDashboard, 15000);
         }
     </script>
 </body>

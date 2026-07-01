@@ -4,298 +4,199 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Meal Tracker</title>
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #f32144;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --text-color: #333;
-            --bg-color: #f5f7fa;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-color);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-        }
-
-        .back-btn {
-            padding: 0.8rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .back-btn:hover {
-            background-color: #d91a3a;
-        }
-
-        .report-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .report-card h2 {
-            color: var(--text-color);
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-            background: var(--bg-color);
-            padding: 1rem;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-card h3 {
-            color: var(--text-color);
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-card p {
-            color: var(--primary-color);
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        .chart-container {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: var(--bg-color);
-            border-radius: 10px;
-        }
-
-        .filter-section {
-            margin-bottom: 1.5rem;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .filter-input {
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .filter-btn {
-            padding: 0.8rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .filter-btn:hover {
-            background-color: #d91a3a;
-        }
-    </style>
+    <link rel="stylesheet" href="public/css/manager-dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Reports</h1>
-            <a href="manager_dashboard.html" class="back-btn">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
-        </div>
+    <div class="mgr-sidebar-overlay" id="mgrSidebarOverlay"></div>
+    <div class="mgr-layout">
+        <aside class="mgr-sidebar" id="mgrSidebar">
+            <div class="mgr-sidebar-brand"><i class="fas fa-utensils"></i><div><h2>Meal Tracker</h2><span>Manager Portal</span></div></div>
+            <nav class="mgr-nav">
+                <a href="manager_dashboard.html" class="mgr-nav-link" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="view_entries.html" class="mgr-nav-link" data-page="entries"><i class="fas fa-list-alt"></i> View Entries</a>
+                <a href="student_records.html" class="mgr-nav-link" data-page="records"><i class="fas fa-user-graduate"></i> Student Records</a>
+                <a href="reports.html" class="mgr-nav-link" data-page="reports"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="profile.html?role=manager" class="mgr-nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Profile</a>
+            </nav>
+            <div class="mgr-sidebar-footer">
+                <div class="mgr-user-card"><div class="mgr-user-avatar" id="mgrUserAvatar">M</div><div class="mgr-user-info"><strong id="mgrUserName">Manager</strong><small>Manager</small></div></div>
+                <button class="mgr-btn mgr-btn-outline" id="mgrLogoutBtn" style="width:100%;color:#fff;border-color:rgba(255,255,255,0.2);"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
 
-        <div class="filter-section">
-            <input type="date" class="filter-input" id="startDate" aria-label="Start Date" placeholder="Start Date">
-            <input type="date" class="filter-input" id="endDate" aria-label="End Date" placeholder="End Date">
-            <select class="filter-input" id="sessionFilter" aria-label="Filter by session">
-                <option value="">All Sessions</option>
-                <option value="Morning">Morning</option>
-                <option value="Evening">Evening</option>
-            </select>
-            <button class="filter-btn" onclick="generateReport()">
-                <i class="fas fa-chart-bar"></i> Generate Report
-            </button>
-        </div>
+        <main class="mgr-main">
+            <header class="mgr-topbar">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <button class="mgr-menu-toggle" id="mgrMenuToggle"><i class="fas fa-bars"></i></button>
+                    <h1>Reports & Analytics</h1>
+                </div>
+                <div class="mgr-topbar-actions">
+                    <button class="mgr-btn mgr-btn-outline mgr-btn-sm" onclick="exportCsv()"><i class="fas fa-file-csv"></i> CSV</button>
+                    <button class="mgr-btn mgr-btn-outline mgr-btn-sm" onclick="exportPdf()"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+            </header>
 
-        <div class="report-card">
-            <h2>Summary Statistics</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Entries</h3>
-                    <p id="totalEntries">0</p>
+            <div class="mgr-content">
+                <div class="mgr-card">
+                    <div class="mgr-card-body">
+                        <div class="mgr-filters">
+                            <input type="date" class="mgr-input" id="reportDate" title="Select any historical date">
+                            <input type="text" class="mgr-input" id="searchInput" placeholder="Search student...">
+                            <input type="text" class="mgr-input" id="departmentFilter" placeholder="Department">
+                            <input type="text" class="mgr-input" id="roomFilter" placeholder="Room">
+                            <select class="mgr-select" id="sessionFilter">
+                                <option value="">All Sessions</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Evening">Evening</option>
+                            </select>
+                            <select class="mgr-select" id="mealStatusFilter">
+                                <option value="">Meal Status</option>
+                                <option value="ON">ON</option>
+                                <option value="OFF">OFF</option>
+                            </select>
+                            <select class="mgr-select" id="analyticsRange">
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                            <button class="mgr-btn mgr-btn-primary" onclick="loadReports()"><i class="fas fa-chart-bar"></i> Generate</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Morning Entries</h3>
-                    <p id="morningEntries">0</p>
+
+                <div class="mgr-stats-grid">
+                    <div class="mgr-stat-card glass-cyan"><div class="icon-wrap cyan"><i class="fas fa-sun"></i></div><div class="label">Morning ON</div><div class="value" id="morningOn">0</div></div>
+                    <div class="mgr-stat-card glass-red"><div class="icon-wrap amber"><i class="fas fa-sun"></i></div><div class="label">Morning OFF</div><div class="value" id="morningOff">0</div></div>
+                    <div class="mgr-stat-card glass-green"><div class="icon-wrap green"><i class="fas fa-moon"></i></div><div class="label">Evening ON</div><div class="value" id="eveningOn">0</div></div>
+                    <div class="mgr-stat-card glass-red"><div class="icon-wrap indigo"><i class="fas fa-moon"></i></div><div class="label">Evening OFF</div><div class="value" id="eveningOff">0</div></div>
+                    <div class="mgr-stat-card glass-indigo"><div class="icon-wrap indigo"><i class="fas fa-users"></i></div><div class="label">Total Students</div><div class="value" id="totalStudents">0</div></div>
+                    <div class="mgr-stat-card glass-cyan"><div class="icon-wrap cyan"><i class="fas fa-percentage"></i></div><div class="label">Attendance %</div><div class="value" id="attendancePct">0%</div></div>
+                    <div class="mgr-stat-card glass-green"><div class="icon-wrap green"><i class="fas fa-utensils"></i></div><div class="label">Meal Count</div><div class="value" id="mealCount">0</div></div>
+                    <div class="mgr-stat-card glass-amber"><div class="icon-wrap amber"><i class="fas fa-lock"></i></div><div class="label">Report Status</div><div class="value" id="reportStatus" style="font-size:1rem;">Live</div></div>
                 </div>
-                <div class="stat-card">
-                    <h3>Evening Entries</h3>
-                    <p id="eveningEntries">0</p>
+
+                <div class="mgr-grid-2">
+                    <div class="mgr-card"><div class="mgr-card-header"><h2><i class="fas fa-building"></i> Department Meals</h2></div><div class="mgr-card-body"><div id="departmentChart"></div></div></div>
+                    <div class="mgr-card"><div class="mgr-card-header"><h2><i class="fas fa-chart-line"></i> Attendance Trend</h2></div><div class="mgr-card-body"><div id="attendanceChart"></div></div></div>
                 </div>
-                <div class="stat-card">
-                    <h3>Active Users</h3>
-                    <p id="activeUsers">0</p>
+
+                <div class="mgr-card">
+                    <div class="mgr-card-header"><h2><i class="fas fa-calendar-day"></i> Historical Student Records</h2></div>
+                    <div class="mgr-card-body mgr-table-wrap">
+                        <table class="mgr-table">
+                            <thead>
+                                <tr><th>Name</th><th>Dept</th><th>Room</th><th>Morning</th><th>Evening</th><th>Date</th></tr>
+                            </thead>
+                            <tbody id="historicalBody"><tr><td colspan="6"><div class="mgr-empty"><i class="fas fa-spinner fa-spin"></i></div></td></tr></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="report-card">
-            <h2>Department-wise Distribution</h2>
-            <div class="chart-container" id="departmentChart">
-                <!-- Chart will be rendered here -->
-            </div>
-        </div>
+        </main>
     </div>
 
+    <script src="public/js/manager-common.js"></script>
     <script>
-        // Check if manager is logged in
-        function checkAuth() {
-            const manager = JSON.parse(localStorage.getItem('manager'));
-            if (!manager) {
-                window.location.href = 'manager_login.html';
-            }
+        function getReportDate() {
+            return document.getElementById('reportDate').value || new Date().toISOString().split('T')[0];
         }
 
-        // Load and display report data
-        async function generateReport() {
+        async function loadReports() {
+            showLoading(true);
             try {
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
+                const date = getReportDate();
+                const daily = await managerFetch(`/api/manager/reports/daily?date=${date}`);
+
+                document.getElementById('morningOn').textContent = daily.morningMealOn;
+                document.getElementById('morningOff').textContent = daily.morningMealOff;
+                document.getElementById('eveningOn').textContent = daily.eveningMealOn;
+                document.getElementById('eveningOff').textContent = daily.eveningMealOff;
+                document.getElementById('totalStudents').textContent = daily.totalStudents;
+                document.getElementById('attendancePct').textContent = daily.attendancePercent + '%';
+                document.getElementById('mealCount').textContent = daily.mealCount;
+
+                const frozen = daily.morningFinalized && daily.eveningFinalized;
+                document.getElementById('reportStatus').textContent = frozen ? 'Frozen' : 'Live';
+                document.getElementById('reportStatus').style.color = frozen ? 'var(--mgr-success)' : 'var(--mgr-warning)';
+
+                const range = document.getElementById('analyticsRange').value;
+                const analytics = await managerFetch(`/api/manager/analytics?range=${range}`);
+                renderBarChart('departmentChart', analytics.departmentMeals || {});
+                renderLineChart('attendanceChart', analytics.attendanceGraph || []);
+
+                const params = new URLSearchParams({ date });
+                const search = document.getElementById('searchInput').value.trim();
+                const department = document.getElementById('departmentFilter').value.trim();
+                const room = document.getElementById('roomFilter').value.trim();
                 const session = document.getElementById('sessionFilter').value;
+                const mealStatus = document.getElementById('mealStatusFilter').value;
+                if (search) params.set('search', search);
+                if (department) params.set('department', department);
+                if (room) params.set('room', room);
+                if (mealStatus) params.set('mealStatus', mealStatus);
+                if (session) params.set('session', session);
 
-                const response = await fetch('http://localhost:3000/api/entries');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch entries');
+                const records = await managerFetch(`/api/manager/student-records?${params}&limit=100`);
+                const tbody = document.getElementById('historicalBody');
+                if (!records.students?.length) {
+                    tbody.innerHTML = '<tr><td colspan="6"><div class="mgr-empty"><p>No records for this date</p></div></td></tr>';
+                } else {
+                    tbody.innerHTML = records.students.map((s) => `
+                        <tr>
+                            <td>${escapeHtml(s.name)}</td>
+                            <td>${escapeHtml(s.department)}</td>
+                            <td>${escapeHtml(s.roomNumber)}</td>
+                            <td>${statusBadge(s.morningStatus)}</td>
+                            <td>${statusBadge(s.eveningStatus)}</td>
+                            <td>${escapeHtml(s.date)}</td>
+                        </tr>
+                    `).join('');
                 }
-                const entries = await response.json();
 
-                // Filter entries based on date range and session
-                let filteredEntries = entries;
-                if (startDate && endDate) {
-                    filteredEntries = entries.filter(entry => {
-                        const entryDate = new Date(entry.timestamp);
-                        return entryDate >= new Date(startDate) && entryDate <= new Date(endDate);
-                    });
-                }
-                if (session) {
-                    filteredEntries = filteredEntries.filter(entry => entry.session === session);
-                }
-
-                // Update statistics
-                updateStatistics(filteredEntries);
-                updateDepartmentChart(filteredEntries);
+                showToast('Report generated', 'success');
             } catch (error) {
-                console.error('Error generating report:', error);
-                alert('Failed to generate report. Please try again.');
+                showToast(error.message, 'error');
+            } finally {
+                showLoading(false);
             }
         }
 
-        // Update statistics
-        function updateStatistics(entries) {
-            document.getElementById('totalEntries').textContent = entries.length;
-            document.getElementById('morningEntries').textContent = 
-                entries.filter(entry => entry.session === 'Morning').length;
-            document.getElementById('eveningEntries').textContent = 
-                entries.filter(entry => entry.session === 'Evening').length;
-            document.getElementById('activeUsers').textContent = 
-                new Set(entries.map(entry => entry.userId)).size;
-        }
-
-        // Update department chart
-        function updateDepartmentChart(entries) {
-            const departmentCounts = {};
-            entries.forEach(entry => {
-                departmentCounts[entry.department] = (departmentCounts[entry.department] || 0) + 1;
+        async function exportCsv() {
+            const date = getReportDate();
+            const token = getManagerToken();
+            window.open(`${API_BASE}/api/manager/export/csv?date=${date}&token=${token}`, '_blank');
+            const res = await fetch(`${API_BASE}/api/manager/export/csv?date=${date}`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
+            const blob = await res.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `meal-report-${date}.csv`;
+            a.click();
+            showToast('CSV exported', 'success');
+        }
 
-            const chartContainer = document.getElementById('departmentChart');
-            chartContainer.innerHTML = '';
-
-            // Create a simple bar chart using divs
-            Object.entries(departmentCounts).forEach(([department, count]) => {
-                const bar = document.createElement('div');
-                bar.style.height = `${count * 10}px`;
-                bar.style.backgroundColor = 'var(--primary-color)';
-                bar.style.margin = '5px 0';
-                bar.style.borderRadius = '5px';
-                bar.style.display = 'flex';
-                bar.style.alignItems = 'center';
-                bar.style.padding = '0 10px';
-                bar.style.color = 'white';
-                bar.style.fontWeight = '500';
-                bar.textContent = `${department}: ${count}`;
-                chartContainer.appendChild(bar);
+        async function exportPdf() {
+            const date = getReportDate();
+            const token = getManagerToken();
+            const res = await fetch(`${API_BASE}/api/manager/export/pdf?date=${date}`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
+            const blob = await res.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `meal-report-${date}.pdf`;
+            a.click();
+            showToast('PDF exported', 'success');
         }
 
-        // Set default date range to current month
-        function setDefaultDateRange() {
-            const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-            document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+        if (checkManagerAuth()) {
+            initSidebar('reports');
+            document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+            loadReports();
         }
-
-        // Initialize page
-        function init() {
-            checkAuth();
-            setDefaultDateRange();
-            generateReport();
-        }
-
-        // Run initialization
-        init();
     </script>
 </body>
-</html> 
+</html>
