@@ -15,7 +15,7 @@
 
 'use strict';
 
-const { transporter } = require('./email');
+const { transporter, sendMailDispatcher } = require('./email');
 const Admin           = require('../models/Admin');
 const Manager         = require('../models/Manager');
 
@@ -268,9 +268,8 @@ async function sendLoginEmail(user, meta, recipients) {
 
     const subject = `🔐 Login Alert - Hostel Meal Tracker`;
 
-    await transporter.sendMail({
-        from: `"Meal Tracker Security" <${process.env.EMAIL_USER}>`,
-        to:   toList.join(', '),
+    await sendMailDispatcher({
+        to:   toList,
         subject,
         html
     });
@@ -385,9 +384,8 @@ async function sendProfileUpdateEmail(user, changes, recipients) {
 
     const subject = `✏️ Your Hostel Profile Was Updated`;
 
-    await transporter.sendMail({
-        from: `"Meal Tracker" <${process.env.EMAIL_USER}>`,
-        to:   toList.join(', '),
+    await sendMailDispatcher({
+        to:   toList,
         subject,
         html
     });

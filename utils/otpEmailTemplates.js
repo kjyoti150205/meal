@@ -13,7 +13,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-const { transporter } = require('./email');
+const { transporter, sendMailDispatcher } = require('./email');
 
 const YEAR = new Date().getFullYear();
 
@@ -155,6 +155,7 @@ function buildLoginOtpEmail(name, otp, role = 'student') {
       </tr>`;
 
     return {
+        otp,
         subject: `🔐 Your Login OTP - Hostel Meal Tracker`,
         html: wrap({
             headerBg:    '#4f46e5',
@@ -214,6 +215,7 @@ function buildEmailVerifyOtpEmail(name, otp) {
       </tr>`;
 
     return {
+        otp,
         subject: `✅ Verify Your Email - Hostel Meal Tracker`,
         html: wrap({
             headerBg:    '#16a34a',
@@ -276,6 +278,7 @@ function buildForgotPasswordOtpEmail(name, otp, role = 'student') {
       </tr>`;
 
     return {
+        otp,
         subject: `🔑 Password Reset OTP - Hostel Meal Tracker`,
         html: wrap({
             headerBg:    '#dc2626',
@@ -292,14 +295,24 @@ function buildForgotPasswordOtpEmail(name, otp, role = 'student') {
 // Convenience: send any of the three email types
 // ─────────────────────────────────────────────────────────────────────────────
 async function sendOtpEmail(toEmail, template) {
-    const { subject, html } = template;
-    await transporter.sendMail({
-        from:    `"Meal Tracker Security" <${process.env.EMAIL_USER}>`,
-        to:      toEmail,
-        subject,
-        html
-    });
-    console.log(`[OtpEmail] ✅ "${subject}" → ${toEmail}`);
+    const { otp, subject, html } = template;
+
+    // ALWAYS print OTP clearly in the server logs so you are never locked out
+    console.log(`\n=============================================================`);
+    console.log(`🔑 [OTP CODE] Target: ${toEmail} | Code: ${otp || 'See Email'}`);
+    console.log(`📨 [Subject]: ${subject}`);
+    console.log(`=============================================================\n`);
+
+    try {
+        await sendMailDispatcher({
+            to: toEmail,
+            subject,
+            html
+        });
+        console.log(`[OtpEmail] ✅ Sent "${subject}" → ${toEmail}`);
+    } catch (err) {
+        console.error(`[OtpEmail] ⚠️ Dispatch notice for ${toEmail}:`, err.message);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

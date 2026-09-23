@@ -7,15 +7,60 @@ const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 5000,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     }
 });
 
+// Universal dispatcher: Uses Resend API (over HTTPS port 443, allowed everywhere)
+// or falls back to Nodemailer (with 5s timeout).
+async function sendMailDispatcher({ to, subject, html, text }) {
+    if (process.env.RESEND_API_KEY) {
+        try {
+            const senderEmail = process.env.RESEND_FROM || 'Meal Tracker <onboarding@resend.dev>';
+            const res = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: senderEmail,
+                    to: Array.isArray(to) ? to : [to],
+                    subject,
+                    html: html || text,
+                    text: text || undefined
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                console.log(`[Resend] ✅ Email sent to ${to}: "${subject}"`);
+                return data;
+            } else {
+                console.error(`[Resend] ⚠️ API error:`, data);
+            }
+        } catch (apiErr) {
+            console.error(`[Resend] ⚠️ HTTP request failed:`, apiErr.message);
+        }
+    }
+
+    const fromAddress = `"Meal Tracker" <${process.env.EMAIL_USER || 'no-reply@mealtracker.local'}>`;
+    return transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject,
+        html,
+        text
+    });
+}
+
 transporter.verify((err, success) => {
     if (err) {
-        console.log("❌ SMTP Verify Error:", err);
+        console.log("❌ SMTP Verify Notice (Free tier blocks SMTP - will use Resend/Console):", err.message);
     } else {
         console.log("✅ SMTP Server Ready");
     }
@@ -25,8 +70,10 @@ transporter.verify((err, success) => {
 // Password Reset OTP
 // ─────────────────────────────────────────────────────────────────────────────
 async function sendPasswordResetOTP(email, otp) {
-    return transporter.sendMail({
-        from: `"Meal Tracker" <${process.env.EMAIL_USER}>`,
+    console.log(`\n==================================================`);
+    console.log(`🔑 [ADMIN OTP] Target: ${email} | Code: ${otp}`);
+    console.log(`==================================================\n`);
+    return sendMailDispatcher({
         to: email,
         subject: "Meal Tracker Admin Password Reset OTP",
         text: `Your OTP is ${otp}\n\nValid for 10 minutes.`
@@ -37,8 +84,7 @@ async function sendPasswordResetOTP(email, otp) {
 // Account Approved Email
 // ─────────────────────────────────────────────────────────────────────────────
 async function sendApprovalEmail(user) {
-    await transporter.sendMail({
-        from: `"Meal Tracker Team" <${process.env.EMAIL_USER}>`,
+    return sendMailDispatcher({
         to: user.email,
         subject: "🎉 Meal Tracker Account Approved",
         html: `
@@ -147,8 +193,7 @@ async function sendApprovalEmail(user) {
 // Account Rejected Email
 // ─────────────────────────────────────────────────────────────────────────────
 async function sendRejectionEmail(user) {
-    return transporter.sendMail({
-        from: `"Meal Tracker Team" <${process.env.EMAIL_USER}>`,
+    return sendMailDispatcher({
         to: user.email,
         subject: "❌ Meal Tracker Account Verification Update",
         html: `
@@ -437,14 +482,13 @@ async function sendMealEmail(data, recipients) {
 </body>
 </html>`;
 
-    await transporter.sendMail({
-        from: `"Meal Tracker" <${process.env.EMAIL_USER}>`,
-        to: toList.join(', '),
+    await sendMailDispatcher({
+        to: toList,
         subject: subjectLine,
         html
     });
 
-    console.log(`[MealEmail] ✅ Sent "${subjectLine}" to [${toList.join(', ')}]`);
+    console.log(`[MealEmail] ✅ Processed "${subjectLine}" to [${toList.join(', ')}]`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -452,6 +496,7 @@ async function sendMealEmail(data, recipients) {
 // ─────────────────────────────────────────────────────────────────────────────
 module.exports = {
     transporter,
+    sendMailDispatcher,
     sendPasswordResetOTP,
     sendApprovalEmail,
     sendRejectionEmail,
