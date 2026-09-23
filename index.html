@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meal Tracker - Home</title>
+
+    <!-- PWA Manifest & Theme -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#f32144">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Meal Tracker">
+    <link rel="apple-touch-icon" href="/public/icons/icon.svg">
+
+    <!-- Register PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('✅ PWA Service Worker registered'))
+                    .catch(err => console.error('❌ Service Worker registration failed:', err));
+            });
+        }
+    </script>
     <!-- Google Font -->
      <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -317,7 +336,7 @@ background-position:0% 50%;
     -webkit-backdrop-filter:blur(20px);
     border-radius:30px;
     border:1px solid var(--glass-border);
-    box-shadow:0 20px 60px rgba(0,0,0,.12);
+    box-shadow:0 20px 60px rgba(0, 255, 179, 0.12);
     position:relative;
     z-index:2;
 }
@@ -890,7 +909,7 @@ box-shadow:0 10px 30px rgba(0,0,0,.2);
 
     <!-- Top Bar for Date and Time -->
     <div class="top-bar" id="topBar">
-        <h2>RADHA KRISHAAN BHAWAN </h2>
+        <h2> MATANGINI BHAWAN (LH 1) </h2>
 
         <ul class="nav-links">
             <li><a href="#home" class="active-link">Home</a></li>
@@ -930,7 +949,7 @@ box-shadow:0 10px 30px rgba(0,0,0,.2);
             <div class="glow-circle c2"></div>
             <div class="glow-circle c3"></div>
             <div class="glow-circle c4"></div>
-            <h1>RADHA KRISHAAN BHAWAN</h1>
+            <h1> MATANGINI BHAWAN (LH 1)</h1>
             <p>Manage your meals efficiently with our easy-to-use meal tracking system.</p>
             <p id="typingText"></p>
             <div class="scroll-indicator">
@@ -965,7 +984,7 @@ box-shadow:0 10px 30px rgba(0,0,0,.2);
 
         <div class="stats-section reveal" id="stats">
             <div class="stat-card">
-                <div class="stat-number" data-count="500">0</div>
+                <div class="stat-number" data-count="100+">0</div>
                 <div class="stat-label">Students Served</div>
             </div>
             <div class="stat-card">
@@ -987,7 +1006,7 @@ box-shadow:0 10px 30px rgba(0,0,0,.2);
     <footer class="site-footer reveal" id="siteFooter">
         <div class="footer-grid">
             <div class="footer-brand">
-                <h3>Radha Krishaan Bhawan</h3>
+                <h3> MATANGINI BHAWAN (LH 1)</h3>
                 <p>A smart, modern hostel meal tracking system built to make daily meal management simple, transparent and effortless for students and managers alike.</p>
                 <div class="footer-social">
                     <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
@@ -1020,16 +1039,16 @@ box-shadow:0 10px 30px rgba(0,0,0,.2);
             <div class="footer-col">
                 <h4>Contact</h4>
                 <ul>
-                    <li><i class="fas fa-location-dot"></i>&nbsp; Hostel Campus, India</li>
-                    <li><i class="fas fa-phone"></i>&nbsp; +91 00000 00000</li>
-                    <li><i class="fas fa-envelope"></i>&nbsp; contact@rkbhawan.com</li>
+                    <li><i class="fas fa-location-dot"></i>&nbsp; MATANGNI BHAWAN (LH 1)</li>
+                    <li><i class="fas fa-phone"></i>&nbsp; +91 6202058658</li>
+                    <li><i class="fas fa-envelope"></i>&nbsp; contact@meal.tracker.com</li>
                 </ul>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <div>&copy; <span id="currentYear"></span> Radha Krishaan Bhawan. All rights reserved.</div>
-            <div class="made-with">Made with <i class="fas fa-heart"></i> by the Hostel Dev Team</div>
+            <div>&copy; <span id="currentYear"></span>  MATANGNI BHAWAN (LH 1). All rights reserved.</div>
+            <div class="made-with">Made with <i class="fas fa-heart"></i> by Jyoti Singh</div>
         </div>
     </footer>
 
@@ -1112,14 +1131,17 @@ popup.style.display="none";
 
         // Dynamic redirection based on login status
         const user = localStorage.getItem('user');
-        const managerToken = localStorage.getItem('managerToken');
+const managerToken = localStorage.getItem('managerToken');
 
-        if (user) {
-            window.location.href = 'user_dashboard.html';
-        } else if (managerToken) {
-            window.location.href = 'manager_dashboard.html';
-        }
+// Auto redirect sirf user ke liye
+if (user) {
+    window.location.href = 'user_dashboard.html';
+}
 
+// Manager ke liye redirect mat karo
+// else if (managerToken) {
+//     window.location.href = 'manager_dashboard.html';
+// }
         /* =========================================================
            PREMIUM ENHANCEMENTS (does not touch anything above)
         ========================================================= */

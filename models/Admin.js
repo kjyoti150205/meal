@@ -21,6 +21,8 @@ const adminSchema = new mongoose.Schema({
         type: String,
         default: 'admin'
     },
+
+    // ── Forgot Password OTP (hashed) ──────────────────────────────────────
     resetOTP: {
         type: String,
         default: null
@@ -32,7 +34,26 @@ const adminSchema = new mongoose.Schema({
     otpVerified: {
         type: Boolean,
         default: false
+    },
+
+    // ── Login OTP (hashed) — 2-step login ─────────────────────────────────
+    loginOtp: {
+        type: String,
+        default: null
+    },
+    loginOtpExpiry: {
+        type: Date,
+        default: null
+    },
+    loginOtpAttempts: {
+        type: Number,
+        default: 0
+    },
+    loginOtpLastSent: {
+        type: Date,
+        default: null
     }
+
 }, {
     timestamps: true
 });

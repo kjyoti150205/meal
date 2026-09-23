@@ -32,6 +32,9 @@ const entrySchema = new mongoose.Schema({
     email: String,
     locked: { type: Boolean, default: false },
     lockedAt: Date,
+    served: { type: Boolean, default: false },
+    servedAt: Date,
+    servedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Manager', default: null },
     history: [historyItemSchema]
 }, {
     timestamps: true

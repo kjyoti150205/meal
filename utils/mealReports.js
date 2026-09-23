@@ -2,6 +2,11 @@ const User = require('../models/User');
 const Entry = require('../models/Entry');
 const MealSummary = require('../models/MealSummary');
 const { getMealDateForSession } = require('./mealSession');
+const {
+    notifyAllManagers,
+    notifyAllAdmins,
+    fireAndForget
+} = require('./notificationHelper');
 
 /**
  * Finalize a meal session — snapshot final ON/OFF counts into MealSummary.
@@ -58,7 +63,39 @@ async function lockAndFinalize(session, dateKey) {
         { $set: { locked: true, lockedAt: new Date() } }
     );
 
-    return finalizeSession(session, mealDate);
+    const summary = await finalizeSession(session, mealDate);
+
+    fireAndForget(async () => {
+        const cutoffTitle = session === 'Morning'
+            ? 'Morning Cutoff Completed'
+            : 'Evening Cutoff Completed';
+
+        await notifyAllManagers({
+            type: session === 'Morning' ? 'morning_cutoff_completed' : 'evening_cutoff_completed',
+            title: cutoffTitle,
+            message: `${session} meal cutoff completed for ${mealDate}. Entries are now locked.`,
+            icon: 'fa-lock',
+            metadata: { session, mealDate, summary }
+        });
+
+        await notifyAllManagers({
+            type: 'daily_meal_finalized',
+            title: 'Daily Meal Finalized',
+            message: `${session} session finalized: ${summary.totalMealOn} ON, ${summary.totalMealOff} OFF (${summary.attendancePercentage}% attendance).`,
+            icon: 'fa-clipboard-check',
+            metadata: { session, mealDate, summary }
+        });
+
+        await notifyAllAdmins({
+            type: 'daily_summary_generated',
+            title: 'Daily Summary Generated',
+            message: `${session} summary for ${mealDate}: ${summary.totalMealOn} meals ON, ${summary.totalMealOff} OFF.`,
+            icon: 'fa-chart-bar',
+            metadata: { session, mealDate, summary }
+        });
+    });
+
+    return summary;
 }
 
 /** Live counts for dashboard (unfrozen session) */

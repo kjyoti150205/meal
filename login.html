@@ -5,6 +5,25 @@
   <title>Login - Meal Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- PWA Manifest & Theme -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#f32144">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Meal Tracker">
+  <link rel="apple-touch-icon" href="/public/icons/icon.svg">
+
+  <!-- Register PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('✅ PWA Service Worker registered'))
+          .catch(err => console.error('❌ Service Worker registration failed:', err));
+      });
+    }
+  </script>
+
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
@@ -594,21 +613,71 @@ color:white;
       </div>
       <form id="loginForm" onsubmit="return handleLogin(event)">
         <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required>
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="student@hostel.com">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required>
+          <input type="password" id="password" name="password" placeholder="Enter password for Option 1">
         </div>
-        <button type="submit" class="submit-btn">
+
+        <!-- Option 1: Email + Password -->
+        <button type="submit" class="submit-btn" id="loginWithPasswordBtn">
           <i class="fas fa-sign-in-alt"></i> Login
         </button>
+
+        <!-- Divider -->
+        <div style="display:flex;align-items:center;margin:16px 0;color:var(--light-text);font-size:12px;">
+          <div style="flex:1;border-bottom:1px solid #e0e0e0;"></div>
+          <span style="padding:0 10px;font-weight:600;letter-spacing:1px;">OR</span>
+          <div style="flex:1;border-bottom:1px solid #e0e0e0;"></div>
+        </div>
+
+        <!-- Option 2: Login with OTP -->
+        <button type="button" class="submit-btn" id="loginWithOtpBtn" onclick="handleOtpLoginRequest()" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);box-shadow:0 8px 20px rgba(6,182,212,0.3);">
+          <i class="fas fa-key"></i> Login with OTP
+        </button>
       </form>
+
+      <!-- OTP PANEL — hidden until Option 2 succeeds -->
+      <div id="otpPanel" style="display:none;">
+        <div style="text-align:center;margin-bottom:18px;">
+          <div style="font-size:32px;margin-bottom:6px;">🔐</div>
+          <h3 style="margin:0 0 4px;font-size:17px;color:var(--text-color);">Enter Your OTP</h3>
+          <p style="margin:0;font-size:13px;color:var(--light-text);">
+            A 6-digit code was sent to <strong id="otpEmailDisplay"></strong>
+          </p>
+        </div>
+        <div class="form-group">
+          <label for="otpInput">OTP Code</label>
+          <input type="text" id="otpInput" maxlength="6" pattern="\d{6}"
+                 placeholder="Enter 6-digit OTP"
+                 style="letter-spacing:8px;font-size:20px;text-align:center;font-weight:700;">
+        </div>
+        <button id="verifyOtpBtn" class="submit-btn" onclick="verifyLoginOtp()">
+          <i class="fas fa-check-circle"></i> Verify OTP
+        </button>
+        <div style="text-align:center;margin-top:12px;">
+          <button id="resendOtpBtn" onclick="resendLoginOtp()" disabled
+                  style="background:none;border:none;color:var(--primary-color);
+                         font-size:13px;cursor:pointer;text-decoration:underline;">
+            Resend OTP (<span id="resendTimer">60</span>s)
+          </button>
+        </div>
+        <div style="text-align:center;margin-top:10px;">
+          <a href="#" onclick="backToLogin()" style="font-size:13px;color:var(--light-text);">
+            ← Back to Login
+          </a>
+        </div>
+      </div>
+
       <div id="status"></div>
       <div class="links">
         <p>Don't have an account? <a href="register.html">Register here</a></p>
       </div>
+      <a href="reset_password.html" class="forgot-password">
+    Forgot Password?
+</a>
       <div class="manager-section">
         <p>Are you a manager?</p>
         <div class="manager-links">
@@ -628,55 +697,208 @@ color:white;
   </a>
 
   <script>
+    let _otpEmail = '';
+    let _resendInterval = null;
+
+    function setStatus(msg, cls) {
+        const el = document.getElementById('status');
+        el.textContent = msg;
+        el.className   = cls || '';
+    }
+
+    function showOtpPanel(email, seconds) {
+        _otpEmail = (email || '').trim();
+        try { sessionStorage.setItem('otpEmail', _otpEmail); } catch(e){}
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('otpPanel').style.display  = 'block';
+        document.getElementById('otpEmailDisplay').textContent = _otpEmail;
+        startResendCountdown(seconds || 60);
+    }
+
+    function backToLogin() {
+        document.getElementById('otpPanel').style.display  = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        clearInterval(_resendInterval);
+        try { sessionStorage.removeItem('otpEmail'); } catch(e){}
+        setStatus('', '');
+    }
+
+    function startResendCountdown(seconds) {
+        const btn   = document.getElementById('resendOtpBtn');
+        const timer = document.getElementById('resendTimer');
+        btn.disabled = true;
+        let remaining = seconds;
+        timer.textContent = remaining;
+        clearInterval(_resendInterval);
+        _resendInterval = setInterval(() => {
+            remaining--;
+            timer.textContent = remaining;
+            if (remaining <= 0) {
+                clearInterval(_resendInterval);
+                btn.disabled = false;
+                btn.innerHTML = 'Resend OTP';
+            }
+        }, 1000);
+    }
+
+    // OPTION 1 — Email + Password Direct Login
     async function handleLogin(event) {
         event.preventDefault();
-        const email = document.getElementById('email').value;
+        const submitBtn = document.getElementById('loginWithPasswordBtn');
+        const email    = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-        const status = document.getElementById('status');
+
+        if (!email || !password) {
+            setStatus('Please enter both Email and Password for Option 1.', 'error');
+            return false;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+        }
 
         try {
-            // Clear any existing user data
             localStorage.removeItem('user');
             localStorage.removeItem('manager');
 
             const response = await fetch(`${window.location.origin}/api/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
+                setStatus(data.message || 'Login failed', 'error');
+                return false;
             }
 
-            // Store user data in localStorage
             localStorage.setItem('user', JSON.stringify(data.user));
             if (data.token) localStorage.setItem('userToken', data.token);
 
-            // Show success message
-            status.textContent = 'Login successful! Redirecting...';
-            status.className = 'success';
-
-            // Redirect to user dashboard
-            setTimeout(() => {
-                window.location.href = 'user_dashboard.html';
-            }, 1000);
+            setStatus('Login successful! Redirecting...', 'success');
+            setTimeout(() => { window.location.href = 'user_dashboard.html'; }, 800);
         } catch (error) {
-            console.error('Login error:', error);
-            status.textContent = error.message || 'Login failed. Please try again.';
-            status.className = 'error';
+            setStatus(error.message || 'Login failed. Please try again.', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        }
+        return false;
+    }
+
+    // OPTION 2 — Request OTP for Email
+    async function handleOtpLoginRequest() {
+        const email = document.getElementById('email').value.trim();
+        const btn   = document.getElementById('loginWithOtpBtn');
+
+        if (!email) {
+            setStatus('Please enter your email address to receive an OTP.', 'error');
+            document.getElementById('email').focus();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+
+        try {
+            const response = await fetch(`${window.location.origin}/api/request-login-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setStatus(data.message || 'Failed to send OTP.', 'error');
+                return;
+            }
+
+            setStatus(data.message || 'OTP sent to your email.', 'success');
+            showOtpPanel(data.email || email, data.cooldownSeconds || 60);
+        } catch (error) {
+            setStatus(error.message || 'Request failed. Please try again.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-key"></i> Login with OTP';
         }
     }
 
-    // Check if already logged in
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user) {
+    // STEP 2 — Verify Login OTP
+    async function verifyLoginOtp() {
+        const otp = document.getElementById('otpInput').value.trim();
+        const btn = document.getElementById('verifyOtpBtn');
+        const targetEmail = (_otpEmail || sessionStorage.getItem('otpEmail') || '').trim();
+
+        if (!targetEmail) {
+            setStatus('Email session missing. Please go back and request OTP again.', 'error');
+            return;
+        }
+
+        if (!/^\d{6}$/.test(otp)) {
+            setStatus('Please enter a valid 6-digit OTP.', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+        try {
+            const response = await fetch(`${window.location.origin}/api/verify-login-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: targetEmail, otp })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setStatus(data.message || 'Invalid OTP.', 'error');
+                return;
+            }
+
+            localStorage.setItem('user', JSON.stringify(data.user));
+            if (data.token) localStorage.setItem('userToken', data.token);
+
+            setStatus('Login successful! Redirecting...', 'success');
+            setTimeout(() => { window.location.href = 'user_dashboard.html'; }, 800);
+        } catch (error) {
+            setStatus(error.message || 'Verification failed. Please try again.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify OTP';
+        }
+    }
+
+    // Resend OTP
+    async function resendLoginOtp() {
+        const targetEmail = (_otpEmail || sessionStorage.getItem('otpEmail') || '').trim();
+        if (!targetEmail) return;
+
+        try {
+            const response = await fetch(`${window.location.origin}/api/request-login-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: targetEmail })
+            });
+            const data = await response.json();
+            setStatus(data.message || 'New OTP sent.', response.ok ? 'success' : 'error');
+            if (response.ok) startResendCountdown(data.cooldownSeconds || 60);
+        } catch (err) {
+            setStatus('Failed to resend OTP. Please try again.', 'error');
+        }
+    }
+
+    if (localStorage.getItem('user') && localStorage.getItem('userToken')) {
         window.location.href = 'user_dashboard.html';
     }
+  </script>
+  <script>
     window.addEventListener("load", () => {
 
 const card=document.querySelector(".card");

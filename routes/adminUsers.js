@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const { sendApprovalEmail, sendRejectionEmail } = require('../utils/email');
+const { notifyStudent, fireAndForget } = require('../utils/notificationHelper');
 
 const router = express.Router();
 
@@ -86,18 +87,23 @@ router.post('/approve/:userId', async (req, res) => {
 
         await sendApprovalEmail(user);
 
+        fireAndForget(async () => {
+            await notifyStudent(user._id, {
+                type: 'account_approved',
+                title: 'Account Approved',
+                message: 'Congratulations! Your account has been approved. You can now access all features.',
+                icon: 'fa-check-circle'
+            });
+        });
+
         res.json({
             message: 'User approved successfully',
             user: formatUser(user)
         });
     } catch (error) {
-    console.error("ERROR MESSAGE:", error.message);
-    console.error("ERROR STACK:", error.stack);
-
-    res.status(500).json({
-        message: error.message
-    });
-}
+        console.error('Approve user error:', error);
+        res.status(500).json({ message: error.message || 'Failed to approve user' });
+    }
 });
 
 router.post('/reject/:userId', async (req, res) => {
@@ -124,20 +130,35 @@ router.post('/reject/:userId', async (req, res) => {
         await user.save();
 await sendRejectionEmail(user);
 
+        fireAndForget(async () => {
+            await notifyStudent(user._id, {
+                type: 'account_rejected',
+                title: 'Account Rejected',
+                message: 'Your account registration has been rejected by the admin.',
+                icon: 'fa-times-circle'
+            });
+        });
+
         res.json({
             message: 'User rejected successfully',
             user: formatUser(user)
         });
     } catch (error) {
-    console.error("========== ERROR ==========");
-    console.error(error);
-    console.error(error.stack);
+        console.error('Reject user error:', error);
+        res.status(500).json({ message: error.message || 'Failed to reject user' });
+    }
+});
 
-    res.status(500).json({
-        message: error.message,
-        stack: error.stack
-    });
-}
+router.post('/reset-meal-counter', async (req, res) => {
+    try {
+        const MealCounter = require('../models/MealCounter');
+        const counter = await MealCounter.resetCounter();
+        console.log('[Admin] ⚠️ Active Meal Counter reset by Admin');
+        res.json({ message: 'Active meal counter reset successfully', counter });
+    } catch (error) {
+        console.error('Reset meal counter error:', error);
+        res.status(500).json({ message: 'Failed to reset meal counter' });
+    }
 });
 
 module.exports = router;

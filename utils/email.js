@@ -21,6 +21,9 @@ transporter.verify((err, success) => {
     }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Password Reset OTP
+// ─────────────────────────────────────────────────────────────────────────────
 async function sendPasswordResetOTP(email, otp) {
     return transporter.sendMail({
         from: `"Meal Tracker" <${process.env.EMAIL_USER}>`,
@@ -30,6 +33,9 @@ async function sendPasswordResetOTP(email, otp) {
     });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Account Approved Email
+// ─────────────────────────────────────────────────────────────────────────────
 async function sendApprovalEmail(user) {
     await transporter.sendMail({
         from: `"Meal Tracker Team" <${process.env.EMAIL_USER}>`,
@@ -137,6 +143,9 @@ async function sendApprovalEmail(user) {
     });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Account Rejected Email
+// ─────────────────────────────────────────────────────────────────────────────
 async function sendRejectionEmail(user) {
     return transporter.sendMail({
         from: `"Meal Tracker Team" <${process.env.EMAIL_USER}>`,
@@ -240,9 +249,211 @@ async function sendRejectionEmail(user) {
     });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Meal Status Email  (ON confirmation  OR  OFF / cancellation)
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * @param {Object}   data
+ * @param {string}   data.studentName
+ * @param {string}   data.instituteId
+ * @param {string}   data.department
+ * @param {string}   data.hostelName
+ * @param {string}   data.roomNumber
+ * @param {string}   data.session      "Morning" | "Evening"
+ * @param {string}   data.status       "ON" | "OFF"
+ * @param {string}   data.mealDate     "YYYY-MM-DD"
+ * @param {Date}     data.timestamp
+ * @param {string[]} recipients        Deduplicated list of email addresses
+ */
+async function sendMealEmail(data, recipients) {
+    // ── Guard: require at least one valid recipient ──────────────────────────
+    const toList = [...new Set((recipients || []).filter(Boolean))];
+    if (toList.length === 0) {
+        console.warn('[MealEmail] No valid recipients — skipping.');
+        return;
+    }
+
+    const {
+        studentName,
+        instituteId,
+        department,
+        hostelName,
+        roomNumber,
+        session,
+        status,
+        mealDate,
+        timestamp
+    } = data;
+
+    const isOn         = status === 'ON';
+    const sessionEmoji = session === 'Morning' ? '🌅' : '🌙';
+
+    // ── Visual tokens (status-aware) ─────────────────────────────────────────
+    const headerBg      = isOn ? '#16a34a'  : '#b91c1c';
+    const headerEmoji   = isOn ? '🍽️'      : '🚫';
+    const statusBadgeBg = isOn ? '#dcfce7'  : '#fee2e2';
+    const statusBadgeFg = isOn ? '#15803d'  : '#991b1b';
+    const statusBorder  = isOn ? '#86efac'  : '#fca5a5';
+    const statusLabel   = isOn ? '✅ Meal ON' : '❌ Meal Cancelled (OFF)';
+    const infoBoxBg     = isOn ? '#eff6ff'  : '#fffbeb';
+    const infoBoxBorder = isOn ? '#3b82f6'  : '#f59e0b';
+    const infoBoxFg     = isOn ? '#1d4ed8'  : '#92400e';
+    const infoBoxText   = isOn
+        ? '📌 This is a confirmation that your meal selection has been recorded. Please be present at the dining hall during meal hours.'
+        : '⚠️ You have cancelled your meal before the cutoff time. If this was a mistake, you can turn it back ON while the session is still open.';
+
+    const subjectLine = isOn
+        ? `🍽️ Meal ON — ${session} | ${studentName} | ${mealDate}`
+        : `🚫 Meal Cancelled — ${session} | ${studentName} | ${mealDate}`;
+
+    const greetingText = isOn
+        ? `Your <strong>${session} Meal</strong> has been marked <strong style="color:#16a34a;">ON</strong> successfully.`
+        : `Your <strong>${session} Meal</strong> has been <strong style="color:#b91c1c;">cancelled</strong> (marked OFF) before the cutoff time.`;
+
+    const formattedTime = new Date(timestamp).toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        dateStyle: 'full',
+        timeStyle: 'medium'
+    });
+
+    // ── Detail rows ──────────────────────────────────────────────────────────
+    const rows = [
+        ['👤 Student Name',          studentName  || '—'],
+        ['🆔 Institute ID',          instituteId  || '—'],
+        ['🏛️ Department',            department   || '—'],
+        ['🏠 Hostel Name',           hostelName   || '—'],
+        ['🚪 Room Number',           roomNumber   || '—'],
+        [`${sessionEmoji} Meal Session`, session],
+        ['📋 Meal Status',           isOn ? '✅ ON' : '❌ OFF (Cancelled)'],
+        ['📅 Date & Time',           formattedTime],
+    ];
+
+    const rowsHtml = rows.map(([label, value], i) => `
+        <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#ffffff'};">
+          <td style="padding:11px 16px;font-size:13px;font-weight:600;color:#6b7280;
+                     width:42%;border-bottom:1px solid #e5e7eb;">${label}</td>
+          <td style="padding:11px 16px;font-size:14px;color:#111827;font-weight:500;
+                     border-bottom:1px solid #e5e7eb;">${value}</td>
+        </tr>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subjectLine}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;
+             font-family:'Segoe UI',Arial,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0"
+         style="background:#f3f4f6;padding:30px 0;">
+    <tr>
+      <td align="center">
+        <table width="620" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;
+                      box-shadow:0 4px 24px rgba(0,0,0,0.10);max-width:620px;">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="background:${headerBg};padding:32px 36px;text-align:center;">
+              <p style="margin:0 0 6px 0;font-size:36px;">${headerEmoji}</p>
+              <h1 style="margin:0 0 4px 0;font-size:22px;font-weight:700;
+                         color:#ffffff;letter-spacing:0.5px;">Meal Tracker</h1>
+              <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.85);">
+                Hostel Meal Management System
+              </p>
+            </td>
+          </tr>
+
+          <!-- STATUS BADGE -->
+          <tr>
+            <td style="padding:24px 36px 0 36px;text-align:center;">
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td style="background:${statusBadgeBg};border:1.5px solid ${statusBorder};
+                             border-radius:999px;padding:10px 28px;">
+                    <span style="font-size:16px;font-weight:700;
+                                 color:${statusBadgeFg};letter-spacing:0.3px;">
+                      ${statusLabel}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- GREETING -->
+          <tr>
+            <td style="padding:20px 36px 0 36px;">
+              <p style="margin:0;font-size:15px;color:#374151;line-height:1.6;">
+                Dear <strong>${studentName}</strong>, ${greetingText}
+              </p>
+            </td>
+          </tr>
+
+          <!-- DETAIL TABLE -->
+          <tr>
+            <td style="padding:20px 36px;">
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="border-collapse:collapse;border:1px solid #e5e7eb;
+                            border-radius:10px;overflow:hidden;">
+                ${rowsHtml}
+              </table>
+            </td>
+          </tr>
+
+          <!-- INFO BOX -->
+          <tr>
+            <td style="padding:0 36px 24px 36px;">
+              <div style="background:${infoBoxBg};border-left:4px solid ${infoBoxBorder};
+                          border-radius:0 8px 8px 0;padding:14px 18px;">
+                <p style="margin:0;font-size:13px;color:${infoBoxFg};line-height:1.6;">
+                  ${infoBoxText}
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="background:#f9fafb;border-top:1px solid #e5e7eb;
+                       padding:20px 36px;text-align:center;">
+              <p style="margin:0 0 4px 0;font-size:13px;color:#6b7280;">
+                This is an automated notification from <strong>Meal Tracker</strong>.
+                Please do not reply to this email.
+              </p>
+              <p style="margin:0;font-size:12px;color:#9ca3af;">
+                &copy; ${new Date().getFullYear()} Meal Tracker System &middot; Hostel Administration
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`;
+
+    await transporter.sendMail({
+        from: `"Meal Tracker" <${process.env.EMAIL_USER}>`,
+        to: toList.join(', '),
+        subject: subjectLine,
+        html
+    });
+
+    console.log(`[MealEmail] ✅ Sent "${subjectLine}" to [${toList.join(', ')}]`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Exports
+// ─────────────────────────────────────────────────────────────────────────────
 module.exports = {
     transporter,
     sendPasswordResetOTP,
     sendApprovalEmail,
-    sendRejectionEmail
+    sendRejectionEmail,
+    sendMealEmail
 };

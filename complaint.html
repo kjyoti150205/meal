@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complaint Box - Meal Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ============================================================
+   Design tokens — indigo/cyan glassmorphism, shared across
+   the Meal Tracker app. Kept local to this page since the
+   shared theme stylesheet isn't wired in here.
+   ============================================================ */
+:root{
+  --primary:#6366f1;
+  --primary-dark:#4338ca;
+  --cyan:#06b6d4;
+  --gradient-brand: linear-gradient(135deg, var(--primary), var(--cyan));
+  --gradient-bg: radial-gradient(1100px 600px at 10% -10%, #eef0ff 0%, transparent 60%),
+                 radial-gradient(900px 500px at 100% 0%, #e6fbff 0%, transparent 55%),
+                 #f6f7fb;
+
+  --surface: rgba(255,255,255,0.72);
+  --surface-solid:#ffffff;
+  --border-soft:#e6e8f7;
+
+  --text:#20223d;
+  --text-muted:#6b7089;
+
+  --info:#3b82f6;      --info-bg:#e8f0ff;
+  --warning:#f59e0b;   --warning-bg:#fef3e0;
+  --danger:#ef4444;    --danger-bg:#fde9e9;
+  --success:#10b981;   --success-bg:#e4f8f0;
+
+  --radius:18px;
+  --radius-sm:12px;
+
+  --shadow-soft: 0 6px 18px rgba(40,45,90,0.06);
+  --shadow-pop:  0 14px 30px rgba(40,45,90,0.14);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  padding:0;
+  font-family:'Inter', system-ui, sans-serif;
+  color:var(--text);
+  background:var(--gradient-bg);
+  background-attachment:fixed;
+  min-height:100vh;
+}
+
+h1,h2,h3,h4{ font-family:'Sora', sans-serif; margin:0; color:var(--text); }
+p{ margin:0; }
+
+a{ text-decoration:none; color:inherit; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  border:none;
+  border-radius:999px;
+  font-family:'Inter', sans-serif;
+  font-weight:600;
+  font-size:0.88rem;
+  cursor:pointer;
+  padding:0.65rem 1.3rem;
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.btn:active{ transform:translateY(1px); }
+.btn-primary{ background:var(--gradient-brand); color:#fff; box-shadow:0 8px 20px rgba(99,102,241,0.35); }
+.btn-primary:hover{ box-shadow:0 10px 26px rgba(99,102,241,0.45); }
+.btn-primary:disabled{ opacity:0.6; cursor:not-allowed; box-shadow:none; }
+.btn-secondary{ background:#eef0fb; color:var(--primary-dark); }
+.btn-secondary:hover{ background:#e2e5f9; }
+.btn-outline{ background:transparent; border:1.5px solid var(--border-soft); color:var(--text-muted); }
+.btn-outline:hover{ border-color:var(--primary); color:var(--primary); }
+.btn-sm{ padding:0.5rem 1rem; font-size:0.8rem; }
+
+/* ---------- Top nav ---------- */
+.complaint-nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:1rem 1.5rem;
+  background:var(--surface);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.6);
+  box-shadow:var(--shadow-soft);
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.complaint-nav .brand{ display:flex; align-items:center; gap:0.7rem; }
+.complaint-nav .brand .logo-badge{
+  width:38px; height:38px; border-radius:11px;
+  background:var(--gradient-brand); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:1rem;
+}
+.complaint-nav .brand h1{ font-size:1.05rem; }
+
+/* ---------- Layout ---------- */
+.page-shell{ max-width:980px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+
+.page-header{ margin:0.5rem 0 1.5rem; }
+.page-header h2{ font-size:1.6rem; margin-bottom:0.3rem; }
+.page-header p{ color:var(--text-muted); font-size:0.92rem; }
+
+/* ---------- Glass card ---------- */
+.glass-card{
+  background:var(--surface);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.7);
+  border-radius:var(--radius);
+  padding:1.6rem;
+  box-shadow:var(--shadow-soft);
+}
+.glass-card h3{ font-size:1.1rem; display:flex; align-items:center; gap:0.5rem; }
+.glass-card h3 i{ color:var(--primary); }
+
+/* ---------- Form ---------- */
+.field{ margin-bottom:1.1rem; }
+.field label{ display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.4rem; color:var(--text); }
+
+.input{
+  width:100%;
+  padding:0.7rem 0.9rem;
+  border-radius:var(--radius-sm);
+  border:1.5px solid var(--border-soft);
+  background:#fff;
+  font-family:'Inter', sans-serif;
+  font-size:0.9rem;
+  color:var(--text);
+  transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(99,102,241,0.15);
+}
+textarea.input{ resize:vertical; font-family:inherit; }
+
+.field.has-error .input{ border-color:var(--danger); box-shadow:0 0 0 3px rgba(239,68,68,0.12); }
+.error-text{ display:none; color:var(--danger); font-size:0.78rem; margin-top:0.35rem; font-weight:600; }
+.field.has-error .error-text{ display:block; }
+
+.complaint-form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0 1rem; }
+@media (max-width:700px){ .complaint-form-grid{ grid-template-columns:1fr; } }
+
+/* Priority picker */
+.priority-picker{ display:flex; gap:0.7rem; }
+.priority-option{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.4rem;
+  text-align:center;
+  padding:0.65rem;
+  border-radius:11px;
+  border:1.5px solid var(--border-soft);
+  cursor:pointer;
+  font-size:0.85rem;
+  font-weight:600;
+  color:var(--text-muted);
+  transition:all 0.2s ease;
+  user-select:none;
+}
+.priority-option input{ display:none; }
+.priority-option:hover{ border-color:#c9cdf0; }
+.priority-option.low.selected{ background:var(--info-bg); border-color:var(--info); color:#1d4ed8; }
+.priority-option.medium.selected{ background:var(--warning-bg); border-color:var(--warning); color:#b45309; }
+.priority-option.high.selected{ background:var(--danger-bg); border-color:var(--danger); color:#b91c1c; }
+
+/* Upload */
+.upload-drop{
+  display:block;
+  border:1.5px dashed #cfd3ef;
+  border-radius:var(--radius-sm);
+  padding:1.4rem;
+  text-align:center;
+  cursor:pointer;
+  color:var(--text-muted);
+  font-size:0.85rem;
+  transition:all 0.2s ease;
+  background:#fafaff;
+}
+.upload-drop:hover{ border-color:var(--primary); color:var(--primary); }
+.upload-drop.drag-over{ border-color:var(--primary); background:#f0f1ff; color:var(--primary); }
+.upload-drop i{ font-size:1.4rem; display:block; margin-bottom:0.5rem; color:var(--primary); }
+.upload-preview{ margin-top:0.9rem; display:none; align-items:center; gap:0.8rem; }
+.upload-preview.visible{ display:flex; }
+.upload-preview img{ width:60px; height:60px; border-radius:10px; object-fit:cover; border:1px solid var(--border-soft); }
+.upload-preview .remove-img{ color:var(--danger); cursor:pointer; font-size:0.82rem; font-weight:600; }
+.upload-preview .remove-img:hover{ text-decoration:underline; }
+
+/* ---------- My Complaints section ---------- */
+.section-heading{ display:flex; align-items:center; justify-content:space-between; margin:2.4rem 0 1.2rem; }
+.section-heading h3{ font-size:1.2rem; display:flex; align-items:center; gap:0.5rem; }
+.section-heading h3 i{ color:var(--primary); }
+
+.complaints-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:1.1rem; }
+
+.complaint-card{
+  background:var(--surface-solid);
+  border-radius:var(--radius);
+  padding:1.3rem;
+  box-shadow:var(--shadow-soft);
+  border:1px solid var(--border-soft);
+  display:flex;
+  flex-direction:column;
+  gap:0.7rem;
+  transition:transform 0.2s ease, box-shadow 0.2s ease;
+}
+.complaint-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-pop); }
+
+.complaint-card .top-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:0.6rem; }
+.complaint-card .cat-chip{ font-size:0.72rem; font-weight:700; color:var(--primary-dark); background:#eef0fb; padding:0.25rem 0.6rem; border-radius:999px; white-space:nowrap; }
+.complaint-card h4{ font-size:1rem; }
+.complaint-card .desc{ font-size:0.84rem; color:var(--text-muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.complaint-card .thumb{ width:100%; max-height:130px; object-fit:cover; border-radius:10px; border:1px solid var(--border-soft); }
+
+.reply-box{ background:#f8f9ff; border-radius:10px; padding:0.7rem 0.9rem; font-size:0.82rem; border-left:3px solid var(--primary); }
+.reply-box b{ color:var(--primary-dark); }
+
+.complaint-card .foot-row{ display:flex; align-items:center; justify-content:space-between; font-size:0.76rem; color:var(--text-muted); margin-top:auto; gap:0.5rem; flex-wrap:wrap; }
+
+.badge{ display:inline-flex; align-items:center; padding:0.25rem 0.6rem; border-radius:999px; font-weight:700; font-size:0.72rem; }
+.badge-priority-Low{ background:var(--info-bg); color:#1d4ed8; }
+.badge-priority-Medium{ background:var(--warning-bg); color:#b45309; }
+.badge-priority-High{ background:var(--danger-bg); color:#b91c1c; }
+
+.badge-status-Pending{ background:var(--warning-bg); color:#b45309; }
+.badge-status-InProgress{ background:var(--info-bg); color:#1d4ed8; }
+.badge-status-Resolved{ background:var(--success-bg); color:#047857; }
+.badge-status-Rejected{ background:var(--danger-bg); color:#b91c1c; }
+
+.card-actions{ display:flex; gap:0.5rem; }
+.icon-btn{
+  border:none; background:#f4f5fb; color:var(--text-muted);
+  width:30px; height:30px; border-radius:8px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:0.8rem;
+  transition:background 0.15s ease, color 0.15s ease;
+}
+.icon-btn:hover{ background:var(--danger-bg); color:var(--danger); }
+
+/* Empty state */
+.empty-state{
+  grid-column:1/-1;
+  text-align:center;
+  padding:3rem 1.5rem;
+  color:var(--text-muted);
+  background:var(--surface-solid);
+  border:1px dashed var(--border-soft);
+  border-radius:var(--radius);
+}
+.empty-state i{ font-size:2rem; color:var(--primary); margin-bottom:0.8rem; display:block; }
+.empty-state h4{ font-size:1rem; color:var(--text); margin-bottom:0.3rem; }
+.empty-state p{ font-size:0.85rem; }
+
+/* Skeleton loader */
+.skeleton{
+  border-radius:var(--radius);
+  background:linear-gradient(90deg, #eceefa 25%, #f5f6fc 37%, #eceefa 63%);
+  background-size:400% 100%;
+  animation:shimmer 1.4s ease infinite;
+}
+@keyframes shimmer{ 0%{ background-position:100% 0; } 100%{ background-position:0 0; } }
+
+/* Toast */
+.toast{
+  position:fixed;
+  bottom:1.5rem;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--text);
+  color:#fff;
+  padding:0.8rem 1.4rem;
+  border-radius:999px;
+  font-size:0.85rem;
+  font-weight:600;
+  box-shadow:var(--shadow-pop);
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.25s ease, transform 0.25s ease;
+  z-index:100;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.toast i{ color:var(--success); }
+
+/* Focus visibility for a11y */
+a:focus-visible, button:focus-visible, .input:focus-visible, .upload-drop:focus-visible, .priority-option:focus-within{
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+}
+</style>
+</head>
+<body>
+
+<nav class="complaint-nav">
+    <div class="brand">
+        <div class="logo-badge"><i class="fa-solid fa-utensils"></i></div>
+        <h1>Meal Tracker</h1>
+    </div>
+    <a href="dashboard.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+</nav>
+
+<div class="page-shell">
+
+    <div class="page-header">
+        <h2>Complaint Box</h2>
+        <p>Facing an issue in the hostel? Let us know and we'll get it sorted.</p>
+    </div>
+
+    <!-- ===================== COMPLAINT FORM ===================== -->
+    <div class="glass-card">
+        <h3 style="margin-bottom:1.2rem;"><i class="fa-solid fa-pen-to-square"></i> Submit a Complaint</h3>
+
+        <form id="complaintForm" novalidate>
+            <div class="complaint-form-grid">
+                <div class="field" id="categoryField">
+                    <label for="category">Category</label>
+                    <select class="input" id="category" required>
+                        <option value="" disabled selected>Select a category</option>
+                        <option>Food Quality</option>
+                        <option>Cleanliness</option>
+                        <option>Drinking Water</option>
+                        <option>Staff Behaviour</option>
+                        <option>Electricity</option>
+                        <option>Washroom</option>
+                        <option>Room Issue</option>
+                        <option>Other</option>
+                    </select>
+                    <span class="error-text">Please select a category.</span>
+                </div>
+
+                <div class="field" id="subjectField">
+                    <label for="subject">Subject</label>
+                    <input class="input" type="text" id="subject" required placeholder="Brief title for your complaint" maxlength="80">
+                    <span class="error-text">Please add a short subject.</span>
+                </div>
+            </div>
+
+            <div class="field" id="descriptionField">
+                <label for="description">Description</label>
+                <textarea class="input" id="description" rows="4" required placeholder="Describe the issue in detail..."></textarea>
+                <span class="error-text">Please describe the issue.</span>
+            </div>
+
+            <div class="field">
+                <label>Priority</label>
+                <div class="priority-picker" id="priorityPicker">
+                    <label class="priority-option low" data-value="Low">
+                        <input type="radio" name="priority" value="Low"> <i class="fa-solid fa-arrow-down"></i> Low
+                    </label>
+                    <label class="priority-option medium selected" data-value="Medium">
+                        <input type="radio" name="priority" value="Medium" checked> <i class="fa-solid fa-minus"></i> Medium
+                    </label>
+                    <label class="priority-option high" data-value="High">
+                        <input type="radio" name="priority" value="High"> <i class="fa-solid fa-arrow-up"></i> High
+                    </label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Attach a photo <span style="color:#9aa1c2;font-weight:400;">(optional)</span></label>
+                <label class="upload-drop" id="uploadDrop" tabindex="0">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span id="uploadLabel">Click to upload an image (JPG, PNG, GIF — max 5MB)</span>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none;">
+                </label>
+                <div class="upload-preview" id="uploadPreview">
+                    <img id="previewImg" src="" alt="Preview">
+                    <span class="remove-img" id="removeImg"><i class="fa-solid fa-xmark"></i> Remove</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submitBtn" style="padding:0.8rem 1.6rem;">
+                <i class="fa-solid fa-paper-plane"></i> Submit Complaint
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================== MY COMPLAINTS ===================== -->
+    <div class="section-heading">
+        <h3><i class="fa-solid fa-clipboard-list"></i> My Complaints</h3>
+        <button class="btn btn-outline btn-sm" id="refreshBtn"><i class="fa-solid fa-rotate"></i> Refresh</button>
+    </div>
+
+    <div class="complaints-grid" id="complaintsGrid">
+        <div class="skeleton" style="height:150px;"></div>
+        <div class="skeleton" style="height:150px;"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toastText">Saved</span></div>
+
+<script>
+(function(){
+    "use strict";
+
+    var STORAGE_KEY = "mealtracker_complaints";
+    var MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB
+
+    var form = document.getElementById("complaintForm");
+    var categoryEl = document.getElementById("category");
+    var subjectEl = document.getElementById("subject");
+    var descriptionEl = document.getElementById("description");
+    var priorityPicker = document.getElementById("priorityPicker");
+    var uploadDrop = document.getElementById("uploadDrop");
+    var imageInput = document.getElementById("imageInput");
+    var uploadLabel = document.getElementById("uploadLabel");
+    var uploadPreview = document.getElementById("uploadPreview");
+    var previewImg = document.getElementById("previewImg");
+    var removeImg = document.getElementById("removeImg");
+    var submitBtn = document.getElementById("submitBtn");
+    var complaintsGrid = document.getElementById("complaintsGrid");
+    var refreshBtn = document.getElementById("refreshBtn");
+    var toast = document.getElementById("toast");
+    var toastText = document.getElementById("toastText");
+
+    /* ---------- Real API integration (MongoDB backed) ---------- */
+    var userRaw = null;
+    try { userRaw = localStorage.getItem('user'); } catch (e) {}
+    var loggedInUser = userRaw ? JSON.parse(userRaw) : null;
+
+    if (!loggedInUser || (!loggedInUser._id && !loggedInUser.id)) {
+        console.warn("No logged in user found. Redirecting to login.");
+        window.location.href = "login.html";
+    }
+
+    var studentId = loggedInUser._id || loggedInUser.id;
+
+    /* ---------- API Fetch My Complaints ---------- */
+    var studentComplaints = [];
+
+    function getAuthHeaders() {
+        var token = localStorage.getItem('userToken') || localStorage.getItem('token');
+        var headers = {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        return headers;
+    }
+
+    function loadMyComplaints() {
+        var url = '/api/complaints/my/' + studentId + '?_t=' + Date.now();
+        return fetch(url, {
+            cache: 'no-store',
+            headers: getAuthHeaders()
+        })
+        .then(function(res) {
+            if (!res.ok) throw new Error('Failed to load complaints');
+            return res.json();
+        })
+        .then(function(data) {
+            studentComplaints = data || [];
+            renderComplaints(studentComplaints);
+        })
+        .catch(function(err) {
+            console.error('Error fetching student complaints:', err);
+            renderComplaints([]);
+        });
+    }
+
+    function escapeHtml(str){
+        var div = document.createElement("div");
+        div.textContent = str == null ? "" : String(str);
+        return div.innerHTML;
+    }
+
+    function formatDate(iso){
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleDateString(undefined, { day:"numeric", month:"short", year:"numeric" }) +
+               " · " + d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" });
+    }
+
+    function showToast(msg, isError){
+        toastText.textContent = msg;
+        toast.querySelector("i").className = isError ? "fa-solid fa-circle-exclamation" : "fa-solid fa-circle-check";
+        toast.querySelector("i").style.color = isError ? "var(--danger)" : "var(--success)";
+        toast.classList.add("show");
+        window.clearTimeout(showToast._t);
+        showToast._t = window.setTimeout(function(){ toast.classList.remove("show"); }, 2600);
+    }
+
+    /* ---------- Priority picker ---------- */
+
+    priorityPicker.addEventListener("click", function(e){
+        var option = e.target.closest(".priority-option");
+        if (!option) return;
+        var radio = option.querySelector("input[type=radio]");
+        radio.checked = true;
+        Array.prototype.forEach.call(priorityPicker.querySelectorAll(".priority-option"), function(opt){
+            opt.classList.toggle("selected", opt === option);
+        });
+    });
+
+    function getSelectedPriority(){
+        var checked = priorityPicker.querySelector("input[type=radio]:checked");
+        return checked ? checked.value : "Medium";
+    }
+
+    /* ---------- Image upload ---------- */
+
+    uploadDrop.addEventListener("click", function(){ imageInput.click(); });
+    uploadDrop.addEventListener("keydown", function(e){
+        if (e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            imageInput.click();
+        }
+    });
+
+    ["dragover", "dragenter"].forEach(function(evt){
+        uploadDrop.addEventListener(evt, function(e){
+            e.preventDefault();
+            uploadDrop.classList.add("drag-over");
+        });
+    });
+    ["dragleave", "dragend", "drop"].forEach(function(evt){
+        uploadDrop.addEventListener(evt, function(e){
+            e.preventDefault();
+            uploadDrop.classList.remove("drag-over");
+        });
+    });
+    uploadDrop.addEventListener("drop", function(e){
+        var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    });
+
+    imageInput.addEventListener("change", function(){
+        var file = imageInput.files && imageInput.files[0];
+        if (file) handleFile(file);
+    });
+
+    function handleFile(file){
+        if (!file.type || file.type.indexOf("image/") !== 0){
+            showToast("Please choose an image file", true);
+            return;
+        }
+        if (file.size > MAX_FILE_BYTES){
+            showToast("Image is larger than 5MB", true);
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(){
+            pendingImageData = reader.result;
+            previewImg.src = pendingImageData;
+            uploadPreview.classList.add("visible");
+            uploadLabel.textContent = file.name;
+        };
+        reader.onerror = function(){
+            showToast("Couldn't read that image", true);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removeImg.addEventListener("click", function(){
+        pendingImageData = null;
+        imageInput.value = "";
+        uploadPreview.classList.remove("visible");
+        previewImg.src = "";
+        uploadLabel.textContent = "Click to upload an image (JPG, PNG, GIF — max 5MB)";
+    });
+
+    /* ---------- Validation ---------- */
+
+    function setFieldError(fieldId, hasError){
+        var field = document.getElementById(fieldId);
+        field.classList.toggle("has-error", hasError);
+    }
+
+    function validate(){
+        var valid = true;
+
+        var categoryOk = !!categoryEl.value;
+        setFieldError("categoryField", !categoryOk);
+        valid = valid && categoryOk;
+
+        var subjectOk = subjectEl.value.trim().length > 0;
+        setFieldError("subjectField", !subjectOk);
+        valid = valid && subjectOk;
+
+        var descOk = descriptionEl.value.trim().length > 0;
+        setFieldError("descriptionField", !descOk);
+        valid = valid && descOk;
+
+        return valid;
+    }
+
+    [categoryEl, subjectEl, descriptionEl].forEach(function(el){
+        el.addEventListener("input", function(){
+            var fieldId = el.closest(".field").id;
+            if (fieldId) setFieldError(fieldId, false);
+        });
+        el.addEventListener("change", function(){
+            var fieldId = el.closest(".field").id;
+            if (fieldId) setFieldError(fieldId, false);
+        });
+    });
+
+    /* ---------- API Fetch My Complaints ---------- */
+    var studentComplaints = [];
+
+    function loadMyComplaints() {
+        return fetch('/api/complaints/my/' + studentId, {
+            headers: getAuthHeaders()
+        })
+        .then(function(res) {
+            if (!res.ok) throw new Error('Failed to load complaints');
+            return res.json();
+        })
+        .then(function(data) {
+            studentComplaints = data || [];
+            renderComplaints(studentComplaints);
+        })
+        .catch(function(err) {
+            console.error('Error fetching student complaints:', err);
+            renderComplaints([]);
+        });
+    }
+
+    /* ---------- Submit ---------- */
+
+    form.addEventListener("submit", function(e){
+        e.preventDefault();
+        if (!validate()){
+            showToast("Please fill in the required fields", true);
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+        var formData = new FormData();
+        formData.append("studentId", studentId);
+        formData.append("userId", studentId);
+        formData.append("studentName", loggedInUser.fullName || loggedInUser.name || "Student");
+        formData.append("email", loggedInUser.email || "");
+        formData.append("instituteId", loggedInUser.instituteId || "");
+        formData.append("department", loggedInUser.department || "");
+        formData.append("roomNumber", loggedInUser.roomNumber || "");
+        formData.append("category", categoryEl.value);
+        formData.append("subject", subjectEl.value.trim());
+        formData.append("description", descriptionEl.value.trim());
+        formData.append("priority", getSelectedPriority());
+
+        if (imageInput.files && imageInput.files[0]) {
+            formData.append("image", imageInput.files[0]);
+        }
+
+        fetch('/api/complaints', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: formData
+        })
+        .then(function(res) {
+            if (!res.ok) return res.json().then(function(d){ throw new Error(d.message || 'Failed to submit'); });
+            return res.json();
+        })
+        .then(function() {
+            form.reset();
+            document.querySelectorAll(".priority-option").forEach(function(opt){
+                opt.classList.toggle("selected", opt.dataset.value === "Medium");
+            });
+            document.querySelector('input[name="priority"][value="Medium"]').checked = true;
+            removeImg.click();
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Complaint';
+            showToast("Complaint submitted successfully");
+            loadMyComplaints();
+        })
+        .catch(function(err) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Complaint';
+            showToast(err.message || "Failed to submit complaint", true);
+        });
+    });
+
+    /* ---------- Rendering ---------- */
+
+    function statusClass(status){
+        return "badge-status-" + (status || "Pending").replace(/\s+/g, "");
+    }
+
+    function complaintCardHtml(c){
+        var cid = c._id || c.id;
+        var img = c.image ? '<img class="thumb" src="' + c.image + '" alt="Attached photo for ' + escapeHtml(c.subject) + '">' : "";
+        var reply = c.managerReply ? '<div class="reply-box"><b>Manager reply:</b> ' + escapeHtml(c.managerReply) + '</div>' : "";
+        return (
+            '<div class="complaint-card" data-id="' + cid + '">' +
+                '<div class="top-row">' +
+                    '<span class="cat-chip">' + escapeHtml(c.category) + '</span>' +
+                    '<div class="card-actions">' +
+                        '<button class="icon-btn" data-action="delete" title="Delete complaint"><i class="fa-solid fa-trash"></i></button>' +
+                    '</div>' +
+                '</div>' +
+                '<h4>' + escapeHtml(c.subject) + '</h4>' +
+                '<p class="desc">' + escapeHtml(c.description) + '</p>' +
+                img +
+                reply +
+                '<div class="foot-row">' +
+                    '<span>' + formatDate(c.createdAt) + '</span>' +
+                    '<span style="display:flex; gap:0.4rem;">' +
+                        '<span class="badge badge-priority-' + c.priority + '">' + c.priority + '</span>' +
+                        '<span class="badge ' + statusClass(c.status) + '">' + escapeHtml(c.status) + '</span>' +
+                    '</span>' +
+                '</div>' +
+            '</div>'
+        );
+    }
+
+    function renderComplaints(list){
+        if (!list || !list.length){
+            complaintsGrid.innerHTML =
+                '<div class="empty-state">' +
+                    '<i class="fa-solid fa-inbox"></i>' +
+                    '<h4>No complaints yet</h4>' +
+                    '<p>Anything you submit above will show up here so you can track its status.</p>' +
+                '</div>';
+            return;
+        }
+        complaintsGrid.innerHTML = list.map(complaintCardHtml).join("");
+    }
+
+    complaintsGrid.addEventListener("click", function(e){
+        var btn = e.target.closest('[data-action="delete"]');
+        if (!btn) return;
+        var card = btn.closest(".complaint-card");
+        var cid = card.getAttribute("data-id");
+
+        if (!confirm("Are you sure you want to delete this complaint?")) return;
+
+        fetch('/api/complaints/' + cid, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        })
+        .then(function(res) {
+            if (!res.ok) throw new Error('Failed to delete complaint');
+            showToast("Complaint deleted");
+            loadMyComplaints();
+        })
+        .catch(function(err) {
+            showToast(err.message || "Failed to delete complaint", true);
+        });
+    });
+
+    refreshBtn.addEventListener("click", function(){
+        complaintsGrid.innerHTML =
+            '<div class="skeleton" style="height:150px;"></div>' +
+            '<div class="skeleton" style="height:150px;"></div>';
+        loadMyComplaints();
+    });
+
+    /* ---------- Init ---------- */
+    loadMyComplaints();
+    setInterval(loadMyComplaints, 8000);
+    window.addEventListener('focus', loadMyComplaints);
+})();
+</script>
+</body>
+</html>

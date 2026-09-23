@@ -94,55 +94,84 @@ router.get('/session-status', (req, res) => {
 
 router.get('/dashboard/stats', async (req, res) => {
     try {
+        const Complaint = require('../models/Complaint');
+        const Notification = require('../models/Notification');
         const now = new Date();
         const morningDate = getMealDateForSession('Morning', now);
         const eveningDate = getMealDateForSession('Evening', now);
 
+        // Query User model directly for accurate unique-student active meal counts.
+        // This is the ONLY correct approach — MealCounter.totalActiveMeals previously
+        // used morningActive + eveningActive which double-counts students in both sessions.
+        const approvedFilter = { verificationStatus: 'approved' };
+
         const [
             totalStudents,
             verifiedStudents,
-            pendingStudents,
-            rejectedStudents,
+            morningActiveMeals,
+            eveningActiveMeals,
+            totalActiveMeals,
             morningLive,
             eveningLive,
-            recentEntries
+            recentEntries,
+            recentComplaints,
+            recentNotifications
         ] = await Promise.all([
             User.countDocuments(),
-            User.countDocuments({ verificationStatus: 'approved' }),
-            User.countDocuments({ verificationStatus: 'pending' }),
-            User.countDocuments({ verificationStatus: 'rejected' }),
+            User.countDocuments(approvedFilter),
+
+            // Morning Active = approved students with currentMorningStatus = 'ON'
+            User.countDocuments({ ...approvedFilter, currentMorningStatus: 'ON' }),
+
+            // Evening Active = approved students with currentEveningStatus = 'ON'
+            User.countDocuments({ ...approvedFilter, currentEveningStatus: 'ON' }),
+
+            // Total Active = UNIQUE students with Morning ON OR Evening ON
+            // (students active in both sessions are counted only ONCE — no double-counting)
+            User.countDocuments({
+                ...approvedFilter,
+                $or: [
+                    { currentMorningStatus: 'ON' },
+                    { currentEveningStatus: 'ON' }
+                ]
+            }),
+
             getLiveCounts('Morning', morningDate),
             getLiveCounts('Evening', eveningDate),
-            Entry.find().sort({ updatedAt: -1 }).limit(8).lean()
+            Entry.find().sort({ updatedAt: -1 }).limit(6).lean(),
+            Complaint.find().sort({ createdAt: -1 }).limit(6).lean(),
+            Notification.find({ recipientRole: 'manager' }).sort({ createdAt: -1 }).limit(6).lean()
         ]);
 
-        const totalActiveMeals = morningLive.totalMealOn + eveningLive.totalMealOn;
-        const attendanceNumerator = morningLive.totalMealOn + eveningLive.totalMealOn;
-        const attendanceDenominator = verifiedStudents * 2 || 1;
-        const attendancePercent = Math.round((attendanceNumerator / attendanceDenominator) * 1000) / 10;
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
 
         res.json({
             totalStudents,
             verifiedStudents,
-            pendingStudents,
-            rejectedStudents,
-            todayMorningOn: morningLive.totalMealOn,
-            todayMorningOff: morningLive.totalMealOff,
-            todayEveningOn: eveningLive.totalMealOn,
-            todayEveningOff: eveningLive.totalMealOff,
-            totalActiveMeals,
-            attendancePercent,
-            liveMealCount: morningLive.liveMealCount + eveningLive.liveMealCount,
-            morningDate,
-            eveningDate,
+
+            todayMorningOn:  Number(morningLive.totalMealOn  || 0),
+            todayMorningOff: Number(morningLive.totalMealOff || 0),
+            todayEveningOn:  Number(eveningLive.totalMealOn  || 0),
+            todayEveningOff: Number(eveningLive.totalMealOff || 0),
+
+            // Live, accurate counts directly from User collection
+            morningActiveMeals,
+            eveningActiveMeals,
+            totalActiveMeals,   // unique students (Morning ON OR Evening ON)
+
             sessionStatus: getBothSessionStatuses(now),
-            recentEntries
+            recentEntries,
+            recentComplaints,
+            recentNotifications
         });
     } catch (error) {
         console.error('Dashboard stats error:', error);
         res.status(500).json({ message: 'Failed to load dashboard stats' });
     }
 });
+
 
 router.get('/students', async (req, res) => {
     try {

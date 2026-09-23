@@ -6,7 +6,9 @@ let usersCache = { pending: [], approved: [], rejected: [] };
 let managersCache = { pending: [], approved: [], rejected: [] };
 
 function getToken() {
-    return localStorage.getItem('adminToken');
+    const t = localStorage.getItem('adminToken');
+    if (!t || t === 'undefined') return null;
+    return t;
 }
 
 function authHeaders() {
@@ -285,6 +287,17 @@ document.getElementById('detailsModal').addEventListener('click', (event) => {
         document.getElementById('detailsModal').classList.remove('open');
     }
 });
+
+async function resetActiveMealCounter() {
+    if (!confirm('Are you sure you want to reset the Total Active Meal Counter to 0?')) return;
+    try {
+        await apiFetch('/api/admin/reset-meal-counter', { method: 'POST' });
+        showToast('Active Meal Counter reset to 0 successfully', 'success');
+    } catch (err) {
+        showToast(err.message || 'Failed to reset active meal counter', 'error');
+    }
+}
+window.resetActiveMealCounter = resetActiveMealCounter;
 
 if (checkAuth()) {
     const admin = JSON.parse(localStorage.getItem('admin') || '{}');

@@ -32,7 +32,25 @@ const managerSchema = new mongoose.Schema({
 
     verificationTimestamp: Date,
 
-    photoUrl: String
+    photoUrl: String,
+
+    // ── Login OTP (hashed) — 2-step login ─────────────────────────────────
+    loginOtp: {
+        type: String,
+        default: null
+    },
+    loginOtpExpiry: {
+        type: Date,
+        default: null
+    },
+    loginOtpAttempts: {
+        type: Number,
+        default: 0
+    },
+    loginOtpLastSent: {
+        type: Date,
+        default: null
+    }
 
 }, {
     timestamps: true

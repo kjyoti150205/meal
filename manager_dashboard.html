@@ -4,14 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard - Meal Tracker</title>
+
+    <!-- PWA Manifest & Theme -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#f32144">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Meal Tracker">
+    <link rel="apple-touch-icon" href="/public/icons/icon.svg">
+
+    <!-- Register PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('✅ PWA Service Worker registered'))
+                    .catch(err => console.error('❌ Service Worker registration failed:', err));
+            });
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="public/css/manager-dashboard.css">
+    <style>
+        .priority-chip {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-Pending { background: #fffbe6; color: #d97706; border: 1px solid #fef3c7; }
+        .status-InProgress { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-Resolved { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .status-Rejected { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .active-num { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    </style>
 </head>
 <body>
     <div class="mgr-sidebar-overlay" id="mgrSidebarOverlay"></div>
 
     <div class="mgr-layout">
+        <!-- Shared Manager Sidebar -->
         <aside class="mgr-sidebar" id="mgrSidebar">
             <div class="mgr-sidebar-brand">
                 <i class="fas fa-utensils"></i>
@@ -21,10 +55,11 @@
                 </div>
             </div>
             <nav class="mgr-nav">
-                <a href="manager_dashboard.html" class="mgr-nav-link" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="manager_dashboard.html" class="mgr-nav-link active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
                 <a href="view_entries.html" class="mgr-nav-link" data-page="entries"><i class="fas fa-list-alt"></i> View Entries</a>
                 <a href="student_records.html" class="mgr-nav-link" data-page="records"><i class="fas fa-user-graduate"></i> Student Records</a>
                 <a href="reports.html" class="mgr-nav-link" data-page="reports"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="manager_complaints.html" class="mgr-nav-link" data-page="complaints"><i class="fas fa-exclamation-circle"></i> Complaints</a>
                 <a href="profile.html?role=manager" class="mgr-nav-link" data-page="profile"><i class="fas fa-user-circle"></i> Profile</a>
             </nav>
             <div class="mgr-sidebar-footer">
@@ -41,95 +76,101 @@
             </div>
         </aside>
 
+        <!-- Main Content Area -->
         <main class="mgr-main">
             <header class="mgr-topbar">
                 <div style="display:flex;align-items:center;gap:0.75rem;">
                     <button class="mgr-menu-toggle" id="mgrMenuToggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
-                    <h1>Dashboard</h1>
+                    <h1>Manager Dashboard</h1>
                 </div>
                 <div class="mgr-topbar-actions">
-                    <span class="mgr-live-pill" id="livePill"><span class="dot"></span> Live</span>
+                    <span class="mgr-live-pill" id="livePill"><span class="dot"></span> Live MongoDB</span>
+                    <button class="mgr-btn mgr-btn-outline mgr-btn-sm" onclick="loadDashboard()"><i class="fas fa-sync-alt"></i> Refresh</button>
                     <a href="index.html" class="mgr-btn mgr-btn-outline"><i class="fas fa-home"></i> Home</a>
                 </div>
             </header>
 
             <div class="mgr-content">
-                <div class="mgr-stats-grid dense" id="statsGrid">
+                <!-- TOP ROW CARDS -->
+                <div class="mgr-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 1.5rem;">
+                    <!-- Card 1: Total Students -->
                     <div class="mgr-stat-card glass-indigo">
                         <div class="icon-wrap indigo"><i class="fas fa-users"></i></div>
                         <div class="label">Total Students</div>
                         <div class="value" id="statTotalStudents">—</div>
+                        <small style="color:var(--mgr-text-muted); font-size:0.75rem;">Total registered students</small>
                     </div>
+
+                    <!-- Card 2: Verified Students -->
                     <div class="mgr-stat-card glass-green">
                         <div class="icon-wrap green"><i class="fas fa-user-check"></i></div>
                         <div class="label">Verified Students</div>
                         <div class="value" id="statVerified">—</div>
+                        <small style="color:var(--mgr-text-muted); font-size:0.75rem;">Approved students only</small>
                     </div>
+
+                    <!-- Card 3: Today's Meal Status (PRIMARY NUMBER = CURRENT ACTIVE MEAL COUNT) -->
+                    <div class="mgr-stat-card glass-cyan">
+                        <div class="icon-wrap cyan"><i class="fas fa-utensils"></i></div>
+                        <div class="label">Today's Meal Status</div>
+                        <div style="margin-top:0.6rem; font-size:0.88rem; line-height:1.5;">
+                            <div style="display:flex; justify-height:center; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                                <span>Morning Active Meals:</span>
+                                <span class="active-num" style="color:var(--mgr-primary-dark);" id="statMorningActiveVal">—</span>
+                            </div>
+                            <div style="font-size:0.75rem; color:var(--mgr-text-muted); margin-bottom:0.6rem; border-bottom:1px dashed rgba(0,0,0,0.08); padding-bottom:0.4rem;">
+                                Today ON: <strong id="statMorningOn" style="color:var(--mgr-success);">—</strong> | Today OFF: <strong id="statMorningOff" style="color:var(--mgr-danger);">—</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                                <span>Evening Active Meals:</span>
+                                <span class="active-num" style="color:var(--mgr-accent);" id="statEveningActiveVal">—</span>
+                            </div>
+                            <div style="font-size:0.75rem; color:var(--mgr-text-muted);">
+                                Today ON: <strong id="statEveningOn" style="color:var(--mgr-success);">—</strong> | Today OFF: <strong id="statEveningOff" style="color:var(--mgr-danger);">—</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECOND ROW CARDS -->
+                <div class="mgr-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-bottom: 1.5rem;">
+                    <!-- Card 4: Today's Meal Summary -->
                     <div class="mgr-stat-card glass-amber">
-                        <div class="icon-wrap amber"><i class="fas fa-clock"></i></div>
-                        <div class="label">Pending Students</div>
-                        <div class="value" id="statPending">—</div>
+                        <div class="icon-wrap amber"><i class="fas fa-calendar-day"></i></div>
+                        <div class="label">Today's Meal Summary</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; margin-top:0.6rem; font-size:0.88rem;">
+                            <div style="background:rgba(255,255,255,0.65); padding:0.5rem 0.75rem; border-radius:8px; border:1px solid rgba(0,0,0,0.05);">
+                                <div style="font-weight:600; font-size:0.75rem; text-transform:uppercase; color:var(--mgr-text-muted);">Morning</div>
+                                <div>ON: <strong id="summaryMorningOn" style="color:var(--mgr-success);">—</strong></div>
+                                <div>OFF: <strong id="summaryMorningOff" style="color:var(--mgr-danger);">—</strong></div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.65); padding:0.5rem 0.75rem; border-radius:8px; border:1px solid rgba(0,0,0,0.05);">
+                                <div style="font-weight:600; font-size:0.75rem; text-transform:uppercase; color:var(--mgr-text-muted);">Evening</div>
+                                <div>ON: <strong id="summaryEveningOn" style="color:var(--mgr-success);">—</strong></div>
+                                <div>OFF: <strong id="summaryEveningOff" style="color:var(--mgr-danger);">—</strong></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mgr-stat-card glass-red">
-                        <div class="icon-wrap indigo"><i class="fas fa-user-times"></i></div>
-                        <div class="label">Rejected Students</div>
-                        <div class="value" id="statRejected">—</div>
-                    </div>
-                    <div class="mgr-stat-card glass-cyan">
-                        <div class="icon-wrap cyan"><i class="fas fa-sun"></i></div>
-                        <div class="label">Morning Meal ON</div>
-                        <div class="value" id="statMorningOn">—</div>
-                    </div>
-                    <div class="mgr-stat-card glass-red">
-                        <div class="icon-wrap amber"><i class="fas fa-sun"></i></div>
-                        <div class="label">Morning Meal OFF</div>
-                        <div class="value" id="statMorningOff">—</div>
-                    </div>
-                    <div class="mgr-stat-card glass-green">
-                        <div class="icon-wrap green"><i class="fas fa-moon"></i></div>
-                        <div class="label">Evening Meal ON</div>
-                        <div class="value" id="statEveningOn">—</div>
-                    </div>
-                    <div class="mgr-stat-card glass-red">
-                        <div class="icon-wrap indigo"><i class="fas fa-moon"></i></div>
-                        <div class="label">Evening Meal OFF</div>
-                        <div class="value" id="statEveningOff">—</div>
-                    </div>
+
+                    <!-- Card 5: Total Active Meals (Persistent Running Counter) -->
                     <div class="mgr-stat-card glass-indigo">
-                        <div class="icon-wrap indigo"><i class="fas fa-utensils"></i></div>
-                        <div class="label">Total Active Meals</div>
-                        <div class="value" id="statActiveMeals">—</div>
-                    </div>
-                    <div class="mgr-stat-card glass-cyan">
-                        <div class="icon-wrap cyan"><i class="fas fa-percentage"></i></div>
-                        <div class="label">Attendance %</div>
-                        <div class="value" id="statAttendance">—</div>
-                    </div>
-                    <div class="mgr-stat-card glass-green">
-                        <div class="icon-wrap green"><i class="fas fa-broadcast-tower"></i></div>
-                        <div class="label">Live Meal Count</div>
-                        <div class="value" id="statLiveCount">—</div>
+                        <div class="icon-wrap indigo"><i class="fas fa-layer-group"></i></div>
+                        <div class="label">Total Active Meals <span class="mgr-badge info" style="font-size:0.65rem; margin-left:0.3rem;">Never Resets</span></div>
+                        <div style="margin-top:0.5rem; font-size:0.88rem; line-height:1.5;">
+                            <div>Morning Active Meals: <strong id="statMorningActive" style="color:var(--mgr-primary);">—</strong></div>
+                            <div>Evening Active Meals: <strong id="statEveningActive" style="color:var(--mgr-accent);">—</strong></div>
+                            <div style="margin-top:0.35rem; padding-top:0.35rem; border-top:1px dashed var(--mgr-border); font-size:1.1rem;">
+                                Total Active Meals: <strong id="statActiveMeals" style="color:var(--mgr-primary-dark); font-weight:700;">—</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mgr-grid-2">
-                    <div class="mgr-card">
-                        <div class="mgr-card-header">
-                            <h2><i class="fas fa-clock"></i> Session Status</h2>
-                        </div>
-                        <div class="mgr-card-body" id="sessionStatusCards">
-                            <div class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>
-                        </div>
-                    </div>
-                    <div class="mgr-card">
-                        <div class="mgr-card-header"><h2><i class="fas fa-chart-pie"></i> Today's Meals</h2></div>
-                        <div class="mgr-card-body"><div id="mealChart"></div></div>
-                    </div>
-                </div>
-
-                <div class="mgr-card">
+                <!-- TABLES SECTION -->
+                <!-- Table 1: Recent Meal Activity -->
+                <div class="mgr-card" style="margin-bottom: 1.5rem;">
                     <div class="mgr-card-header">
-                        <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                        <h2><i class="fas fa-history"></i> Recent Meal Activity</h2>
                         <a href="view_entries.html" class="mgr-btn mgr-btn-primary mgr-btn-sm">View All</a>
                     </div>
                     <div class="mgr-card-body mgr-table-wrap">
@@ -144,7 +185,52 @@
                                 </tr>
                             </thead>
                             <tbody id="recentEntriesBody">
-                                <tr><td colspan="5" class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></td></tr>
+                                <tr><td colspan="5" class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading meal entries...</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table 2: Recent Complaints -->
+                <div class="mgr-card" style="margin-bottom: 1.5rem;">
+                    <div class="mgr-card-header">
+                        <h2><i class="fas fa-comments"></i> Recent Complaints</h2>
+                        <a href="manager_complaints.html" class="mgr-btn mgr-btn-primary mgr-btn-sm">View All</a>
+                    </div>
+                    <div class="mgr-card-body mgr-table-wrap">
+                        <table class="mgr-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Category</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th>Submitted Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentComplaintsBody">
+                                <tr><td colspan="5" class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading complaints...</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table 3: Recent Notifications -->
+                <div class="mgr-card" style="margin-bottom: 1.5rem;">
+                    <div class="mgr-card-header">
+                        <h2><i class="fas fa-bell"></i> Recent Notifications</h2>
+                    </div>
+                    <div class="mgr-card-body mgr-table-wrap">
+                        <table class="mgr-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Message</th>
+                                    <th>Date & Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentNotificationsBody">
+                                <tr><td colspan="3" class="mgr-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading notifications...</p></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -158,78 +244,94 @@
         if (checkManagerAuth()) {
             initSidebar('dashboard');
 
-            function renderSessionCards(status) {
-                const el = document.getElementById('sessionStatusCards');
-                const sessions = [
-                    { key: 'morning', label: 'Morning Meal', icon: 'fa-sun' },
-                    { key: 'evening', label: 'Evening Meal', icon: 'fa-moon' }
-                ];
-
-                el.innerHTML = sessions.map(({ key, label, icon }) => {
-                    const s = status[key];
-                    const pillClass = s.open ? '' : 'closed';
-                    const pillText = s.open ? 'Open' : 'Closed';
-                    const countdown = s.open ? formatMs(s.closesInMs) : 'Locked';
-                    return `
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;background:rgba(99,102,241,0.06);border-radius:10px;margin-bottom:0.75rem;">
-                            <div><i class="fas ${icon}" style="color:var(--mgr-primary);margin-right:0.5rem;"></i><strong>${label}</strong>
-                            <div style="font-size:0.8rem;color:var(--mgr-text-muted);margin-top:0.25rem;">Date: ${s.mealDate}</div></div>
-                            <div style="text-align:right;">
-                                <span class="mgr-live-pill ${pillClass}"><span class="dot"></span> ${pillText}</span>
-                                <div style="font-size:1.25rem;font-weight:700;margin-top:0.35rem;font-variant-numeric:tabular-nums;">${countdown}</div>
-                            </div>
-                        </div>`;
-                }).join('');
-            }
-
             async function loadDashboard() {
                 showLoading(true);
                 try {
                     const stats = await managerFetch('/api/manager/dashboard/stats');
 
-                    document.getElementById('statTotalStudents').textContent = stats.totalStudents;
-                    document.getElementById('statVerified').textContent = stats.verifiedStudents;
-                    document.getElementById('statPending').textContent = stats.pendingStudents;
-                    document.getElementById('statRejected').textContent = stats.rejectedStudents;
-                    document.getElementById('statMorningOn').textContent = stats.todayMorningOn;
-                    document.getElementById('statMorningOff').textContent = stats.todayMorningOff;
-                    document.getElementById('statEveningOn').textContent = stats.todayEveningOn;
-                    document.getElementById('statEveningOff').textContent = stats.todayEveningOff;
-                    document.getElementById('statActiveMeals').textContent = stats.totalActiveMeals;
-                    document.getElementById('statAttendance').textContent = stats.attendancePercent + '%';
-                    document.getElementById('statLiveCount').textContent = stats.liveMealCount;
+                    document.getElementById('statTotalStudents').textContent = stats.totalStudents || 0;
+                    document.getElementById('statVerified').textContent = stats.verifiedStudents || 0;
 
-                    renderSessionCards(stats.sessionStatus);
-                    renderDonutChart('mealChart', {
-                        'Morning ON': stats.todayMorningOn,
-                        'Morning OFF': stats.todayMorningOff,
-                        'Evening ON': stats.todayEveningOn,
-                        'Evening OFF': stats.todayEveningOff
-                    });
+                    // Today's Meal Status Primary Number = Current Active Meal Count (Previous + Today ON - Today OFF)
+                    document.getElementById('statMorningActiveVal').textContent = stats.morningActiveMeals || 0;
+                    document.getElementById('statEveningActiveVal').textContent = stats.eveningActiveMeals || 0;
 
-                    const tbody = document.getElementById('recentEntriesBody');
+                    // Subtitle Today's ON/OFF counts
+                    document.getElementById('statMorningOn').textContent = stats.todayMorningOn || 0;
+                    document.getElementById('statMorningOff').textContent = stats.todayMorningOff || 0;
+                    document.getElementById('statEveningOn').textContent = stats.todayEveningOn || 0;
+                    document.getElementById('statEveningOff').textContent = stats.todayEveningOff || 0;
+
+                    // Today's Meal Summary
+                    document.getElementById('summaryMorningOn').textContent = stats.todayMorningOn || 0;
+                    document.getElementById('summaryMorningOff').textContent = stats.todayMorningOff || 0;
+                    document.getElementById('summaryEveningOn').textContent = stats.todayEveningOn || 0;
+                    document.getElementById('summaryEveningOff').textContent = stats.todayEveningOff || 0;
+
+                    // Persistent Total Active Meals Counter
+                    document.getElementById('statMorningActive').textContent = stats.morningActiveMeals || 0;
+                    document.getElementById('statEveningActive').textContent = stats.eveningActiveMeals || 0;
+                    document.getElementById('statActiveMeals').textContent = stats.totalActiveMeals || 0;
+
+                    // Render Recent Meal Entries
+                    const entriesBody = document.getElementById('recentEntriesBody');
                     if (!stats.recentEntries?.length) {
-                        tbody.innerHTML = '<tr><td colspan="5"><div class="mgr-empty"><i class="fas fa-inbox"></i><p>No entries yet</p></div></td></tr>';
+                        entriesBody.innerHTML = '<tr><td colspan="5" class="mgr-empty"><i class="fas fa-inbox"></i><p>No meal entries yet</p></td></tr>';
                     } else {
-                        tbody.innerHTML = stats.recentEntries.map((entry) => `
+                        entriesBody.innerHTML = stats.recentEntries.map((e) => `
                             <tr>
-                                <td>${escapeHtml(entry.name)}</td>
-                                <td>${escapeHtml(entry.session)}</td>
-                                <td>${statusBadge(entry.status)}</td>
-                                <td>${escapeHtml(entry.department || '—')}</td>
-                                <td>${formatDateTime(entry.updatedAt || entry.timestamp)}</td>
+                                <td><strong>${escapeHtml(e.name || 'Student')}</strong></td>
+                                <td><span class="mgr-badge info">${escapeHtml(e.session)}</span></td>
+                                <td>${statusBadge(e.status)}</td>
+                                <td>${escapeHtml(e.department || '—')}</td>
+                                <td>${formatDateTime(e.updatedAt || e.timestamp)}</td>
                             </tr>
                         `).join('');
                     }
+
+                    // Render Recent Complaints
+                    const complaintsBody = document.getElementById('recentComplaintsBody');
+                    if (!stats.recentComplaints?.length) {
+                        complaintsBody.innerHTML = '<tr><td colspan="5" class="mgr-empty"><i class="fas fa-inbox"></i><p>No complaints submitted yet</p></td></tr>';
+                    } else {
+                        complaintsBody.innerHTML = stats.recentComplaints.map((c) => {
+                            const statusClass = 'status-' + (c.status || 'Pending').replace(/\s+/g, '');
+                            return `
+                                <tr>
+                                    <td><strong>${escapeHtml(c.studentName || 'Student')}</strong></td>
+                                    <td><span class="mgr-badge info">${escapeHtml(c.category || 'General')}</span></td>
+                                    <td><strong>${escapeHtml(c.subject || '—')}</strong></td>
+                                    <td><span class="priority-chip ${statusClass}">${escapeHtml(c.status || 'Pending')}</span></td>
+                                    <td>${formatDateTime(c.createdAt)}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+
+                    // Render Recent Notifications
+                    const notifBody = document.getElementById('recentNotificationsBody');
+                    if (!stats.recentNotifications?.length) {
+                        notifBody.innerHTML = '<tr><td colspan="3" class="mgr-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></td></tr>';
+                    } else {
+                        notifBody.innerHTML = stats.recentNotifications.map((n) => `
+                            <tr>
+                                <td><strong><i class="fas ${escapeHtml(n.icon || 'fa-bell')}" style="margin-right:0.4rem;color:var(--mgr-primary);"></i> ${escapeHtml(n.title)}</strong></td>
+                                <td>${escapeHtml(n.message)}</td>
+                                <td>${formatDateTime(n.createdAt)}</td>
+                            </tr>
+                        `).join('');
+                    }
+
                 } catch (error) {
-                    showToast(error.message, 'error');
+                    showToast(error.message || 'Failed to load dashboard statistics', 'error');
                 } finally {
                     showLoading(false);
                 }
             }
 
             loadDashboard();
-            setInterval(loadDashboard, 15000);
+            // Auto refresh turned off as requested
+            window.addEventListener('focus', loadDashboard);
         }
     </script>
 </body>

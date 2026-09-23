@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - Meal Tracker</title>
+
+    <!-- PWA Manifest & Theme -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#f32144">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Meal Tracker">
+    <link rel="apple-touch-icon" href="/public/icons/icon.svg">
+
+    <!-- Register PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('✅ PWA Service Worker registered'))
+                    .catch(err => console.error('❌ Service Worker registration failed:', err));
+            });
+        }
+    </script>
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
@@ -482,11 +501,15 @@
     <nav class="navbar">
         <h1>Meal Tracker</h1>
         <div class="nav-links">
-            <a href="/index.html" class="nav-link">
+    <a href="index.html" class="nav-link">
     <i class="fas fa-home"></i>
     Home
 </a>
             
+    <a href="complaint.html" class="nav-link">
+    <i class="fas fa-home"></i>
+    <span>Complaint Box</span>
+</a>
             <a href="#" class="nav-link">
                 <i class="fas fa-history"></i>
                 History
@@ -696,9 +719,15 @@ function updateSessionUI(key, sessionInfo) {
     }
 }
 
+const userToken = localStorage.getItem('userToken');
+
 async function refreshSessionState() {
     try {
-        const res = await fetch(`${API}/api/entries/user/${user._id}/today`);
+        const res = await fetch(`${API}/api/entries/user/${user._id}/today`, {
+            headers: {
+                'Authorization': `Bearer ${userToken}`
+            }
+        });
         sessionData = await res.json();
         updateSessionUI('morning', sessionData.sessionStatus.morning);
         updateSessionUI('evening', sessionData.sessionStatus.evening);
@@ -728,7 +757,11 @@ function tickCountdown() {
 }
 
 async function fetchUserSessions() {
-    const res = await fetch(`${API}/api/entries/user/${user._id}`);
+    const res = await fetch(`${API}/api/entries/user/${user._id}`, {
+        headers: {
+            'Authorization': `Bearer ${userToken}`
+        }
+    });
     return res.ok ? res.json() : [];
 }
 
@@ -759,7 +792,10 @@ async function setMeal(session, status) {
     try {
         const res = await fetch(`${API}/api/entries`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+            },
             body: JSON.stringify({
                 userId: user._id,
                 session,

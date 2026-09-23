@@ -461,14 +461,18 @@ btn.addEventListener("mouseenter",()=>{
     });
 
 });
+let _regEmail      = '';
+let _regResendInt  = null;
+
 async function handleRegister(event) {
     event.preventDefault();
+    const btn = document.querySelector('.card form .submit-btn');
 
-    const fullName = document.getElementById('fullName').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const instituteId = document.getElementById('instituteId').value.trim();
-    const password = document.getElementById('password').value;
+    const fullName        = document.getElementById('fullName').value.trim();
+    const phone           = document.getElementById('phone').value.trim();
+    const email           = document.getElementById('email').value.trim();
+    const instituteId     = document.getElementById('instituteId').value.trim();
+    const password        = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
     if (!/^[0-9]{10}$/.test(phone)) {
@@ -486,19 +490,16 @@ async function handleRegister(event) {
         return;
     }
 
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+    }
+
     try {
-        const response = await fetch("http://localhost:3000/api/register", {
+        const response = await fetch(`${window.location.origin}/api/register`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                fullName,
-                email,
-                phone,
-                instituteId,
-                password
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullName, email, phone, instituteId, password })
         });
 
         const data = await response.json();
@@ -507,16 +508,144 @@ async function handleRegister(event) {
             throw new Error(data.message);
         }
 
-        showSuccess("Registration Successful!");
-
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 2000);
+        // Server now returns requiresEmailVerification: true
+        _regEmail = data.email || email;
+        showEmailVerifyPanel(_regEmail);
 
     } catch (error) {
         showError(error.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Register';
+        }
     }
 }
+
+function showEmailVerifyPanel(email) {
+    const card = document.querySelector('.card');
+
+    // Build and inject the OTP panel
+    const panel = document.createElement('div');
+    panel.id = 'emailVerifyPanel';
+    panel.innerHTML = `
+        <div style="text-align:center;margin-bottom:18px;">
+            <div style="font-size:40px;margin-bottom:6px;">✅</div>
+            <h3 style="font-size:18px;color:#333;margin:0 0 6px;">Verify Your Email</h3>
+            <p style="font-size:13px;color:#666;margin:0;">
+                A 6-digit code was sent to <strong>${email}</strong>.<br>
+                Enter it below to activate your account.
+            </p>
+        </div>
+        <div class="form-group">
+            <label for="emailOtpInput">Verification OTP</label>
+            <input type="text" id="emailOtpInput" maxlength="6" pattern="\\d{6}"
+                   placeholder="Enter 6-digit OTP"
+                   style="letter-spacing:8px;font-size:20px;text-align:center;font-weight:700;
+                          width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;
+                          box-sizing:border-box;margin-top:6px;">
+        </div>
+        <button id="verifyEmailBtn" class="submit-btn" onclick="verifyEmailOtp()" style="width:100%;">
+            <i class="fas fa-check-circle"></i> Verify Email
+        </button>
+        <div style="text-align:center;margin-top:12px;">
+            <button id="resendEmailOtpBtn" onclick="resendEmailOtp()" disabled
+                    style="background:none;border:none;color:var(--primary);
+                           font-size:13px;cursor:pointer;text-decoration:underline;">
+                Resend OTP (<span id="emailResendTimer">30</span>s)
+            </button>
+        </div>
+        <div id="emailVerifyStatus" style="margin-top:10px;text-align:center;font-size:13px;"></div>
+    `;
+
+    // Hide the form, show the panel
+    const form = card.querySelector('form');
+    if (form) form.style.display = 'none';
+    const statusDiv = document.getElementById('status');
+    if (statusDiv) statusDiv.style.display = 'none';
+    card.appendChild(panel);
+    startEmailResendCountdown(30);
+}
+
+function startEmailResendCountdown(seconds) {
+    const btn   = document.getElementById('resendEmailOtpBtn');
+    const timer = document.getElementById('emailResendTimer');
+    if (!btn || !timer) return;
+    btn.disabled = true;
+    let remaining = seconds;
+    timer.textContent = remaining;
+    clearInterval(_regResendInt);
+    _regResendInt = setInterval(() => {
+        remaining--;
+        timer.textContent = remaining;
+        if (remaining <= 0) {
+            clearInterval(_regResendInt);
+            btn.disabled  = false;
+            btn.innerHTML = 'Resend OTP';
+        }
+    }, 1000);
+}
+
+async function verifyEmailOtp() {
+    const otp = document.getElementById('emailOtpInput').value.trim();
+    const btn = document.getElementById('verifyEmailBtn');
+    const statusEl = document.getElementById('emailVerifyStatus');
+
+    if (!/^\d{6}$/.test(otp)) {
+        statusEl.textContent = 'Please enter a valid 6-digit OTP.';
+        statusEl.style.color = '#f44336';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+    try {
+        const response = await fetch(`${window.location.origin}/api/verify-email-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: _regEmail, otp })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            statusEl.textContent = data.message || 'Invalid OTP.';
+            statusEl.style.color = '#f44336';
+            return;
+        }
+
+        statusEl.textContent = '✅ Email verified! Redirecting to login...';
+        statusEl.style.color = '#4CAF50';
+        clearInterval(_regResendInt);
+        setTimeout(() => { window.location.href = 'login.html'; }, 1800);
+    } catch (err) {
+        statusEl.textContent = 'Verification failed. Please try again.';
+        statusEl.style.color = '#f44336';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify Email';
+    }
+}
+
+async function resendEmailOtp() {
+    const statusEl = document.getElementById('emailVerifyStatus');
+    try {
+        const response = await fetch(`${window.location.origin}/api/resend-email-verify-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: _regEmail })
+        });
+        const data = await response.json();
+        statusEl.textContent = data.message || 'New OTP sent.';
+        statusEl.style.color = response.ok ? '#4CAF50' : '#f44336';
+        if (response.ok) startEmailResendCountdown(30);
+    } catch (err) {
+        statusEl.textContent = 'Failed to resend OTP.';
+        statusEl.style.color = '#f44336';
+    }
+}
+
     // 👇 YAHAN ADD KARO
   </script>
 </body>
