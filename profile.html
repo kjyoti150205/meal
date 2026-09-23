@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Shared Responsive Foundation -->
+    <link rel="stylesheet" href="public/css/responsive.css">
     <style>
         :root{
     --primary:#4f46e5;
@@ -35,8 +37,9 @@ body{
         radial-gradient(circle at bottom right,#ede9fe 0%,transparent 35%),
         #f8fafc;
     min-height:100vh;
-    padding:35px 20px;
+    padding: clamp(16px, 4vw, 35px) clamp(12px, 4vw, 20px);
     color:var(--text);
+    overflow-x: hidden;
 }
 
 .container{

@@ -214,18 +214,43 @@ body.mgr-auth-page {
     color: #d97706;
 }
 
-.mgr-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+
+/* ---------- Inputs: prevent iOS zoom + touch targets ---------- */
+.mgr-auth-form input,
+.mgr-auth-form select {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+    min-height: 48px;
 }
 
-@media (max-width: 480px) {
-    .mgr-auth-card {
-        padding: 1.75rem;
+.mgr-auth-submit {
+    min-height: 48px;
+}
+
+/* ---------- Responsive Breakpoints ---------- */
+@media (max-width: 560px) {
+    body.mgr-auth-page {
+        padding: 1rem env(safe-area-inset-right, 1rem) env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 1rem);
+        align-items: flex-start;
+        padding-top: 2rem;
     }
+
+    .mgr-auth-container {
+        max-width: 100%;
+    }
+
+    .mgr-auth-card {
+        padding: clamp(1.25rem, 5vw, 1.75rem);
+        border-radius: 16px;
+    }
+
+    .mgr-auth-logo h1 { font-size: 1.25rem; }
 
     .mgr-form-row {
         grid-template-columns: 1fr;
     }
+}
+
+@media (max-width: 380px) {
+    .mgr-auth-card { padding: 1.25rem; }
+    .mgr-auth-logo .icon-circle { width: 52px; height: 52px; font-size: 1.4rem; }
 }

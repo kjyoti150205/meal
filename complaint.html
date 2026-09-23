@@ -6,6 +6,7 @@
 <title>Complaint Box - Meal Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="public/css/responsive.css">
 <style>
 /* ============================================================
    Design tokens — indigo/cyan glassmorphism, shared across
@@ -105,7 +106,7 @@ a{ text-decoration:none; color:inherit; }
 .complaint-nav .brand h1{ font-size:1.05rem; }
 
 /* ---------- Layout ---------- */
-.page-shell{ max-width:980px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+.page-shell{ max-width:980px; margin:0 auto; padding: clamp(1rem, 4vw, 2rem) clamp(0.85rem, 4vw, 1.5rem) 4rem; }
 
 .page-header{ margin:0.5rem 0 1.5rem; }
 .page-header h2{ font-size:1.6rem; margin-bottom:0.3rem; }
@@ -130,13 +131,14 @@ a{ text-decoration:none; color:inherit; }
 
 .input{
   width:100%;
-  padding:0.7rem 0.9rem;
+  padding:0.75rem 0.9rem;
   border-radius:var(--radius-sm);
   border:1.5px solid var(--border-soft);
   background:#fff;
   font-family:'Inter', sans-serif;
-  font-size:0.9rem;
+  font-size:16px; /* Prevents iOS auto-zoom */
   color:var(--text);
+  min-height: 48px;
   transition:border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .input:focus{

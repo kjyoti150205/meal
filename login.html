@@ -29,6 +29,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Shared Responsive Foundation -->
+  <link rel="stylesheet" href="public/css/responsive.css">
 
   <style>
     :root{
@@ -165,12 +167,13 @@ border:1px solid var(--border);
 
 border-radius:25px;
 
-padding:45px;
+padding: clamp(28px, 7vw, 45px);
 
 box-shadow:var(--shadow);
 
-animation:fade .7s;
-    animation: fadeInUp .8s ease;
+animation: fadeInUp .8s ease;
+width: 100%;
+max-width: clamp(300px, 90vw, 480px);
 }
 
 @keyframes fadeInUp{
@@ -266,7 +269,7 @@ text-shadow:0 0 20px #6b7cff;
 
 width:100%;
 
-padding:15px 18px;
+padding: 14px 18px;
 
 border-radius:14px;
 
@@ -276,8 +279,8 @@ background:white;
 
 transition:.3s;
 
-font-size:15px;
-
+font-size:16px; /* Prevents iOS auto-zoom */
+min-height: 48px;
 }
 
 input:focus{
@@ -521,12 +524,25 @@ opacity:0;
 
 @media(max-width:600px){
 
+    body {
+        overflow-y: auto;
+        padding: 16px;
+        align-items: flex-start;
+        padding-top: 2rem;
+    }
+
+    .card {
+        padding: clamp(20px, 6vw, 32px);
+        border-radius: 18px;
+    }
+
     .manager-links{
         flex-direction:column;
     }
 
     .manager-link{
         width:100%;
+        min-height: 48px;
     }
 
     .admin-access-link{
@@ -534,6 +550,10 @@ opacity:0;
         bottom:15px;
         font-size:12px;
         padding:8px 14px;
+    }
+
+    .submit-btn {
+        min-height: 50px;
     }
 }
     .home-btn{
