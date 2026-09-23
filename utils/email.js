@@ -16,9 +16,42 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Universal dispatcher: Uses Resend API (over HTTPS port 443, allowed everywhere)
-// or falls back to Nodemailer (with 5s timeout).
+// Universal dispatcher:
+// 1. Brevo API (over HTTPS port 443, delivers to ANY student email!)
+// 2. Resend API (over HTTPS port 443)
+// 3. Nodemailer fallback (with 5s timeout)
 async function sendMailDispatcher({ to, subject, html, text }) {
+    if (process.env.BREVO_API_KEY) {
+        try {
+            const recipientList = (Array.isArray(to) ? to : [to]).map(e => ({ email: String(e).trim() }));
+            const senderEmail = process.env.EMAIL_USER || 'meal.tracker07@gmail.com';
+            const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'api-key': process.env.BREVO_API_KEY,
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: { name: 'Meal Tracker', email: senderEmail },
+                    to: recipientList,
+                    subject,
+                    htmlContent: html || text,
+                    textContent: text || undefined
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                console.log(`[Brevo] ✅ Email delivered to ${JSON.stringify(to)}: "${subject}"`);
+                return data;
+            } else {
+                console.error(`[Brevo] ⚠️ API error:`, data);
+            }
+        } catch (brevoErr) {
+            console.error(`[Brevo] ⚠️ HTTP request failed:`, brevoErr.message);
+        }
+    }
+
     if (process.env.RESEND_API_KEY) {
         try {
             const senderEmail = process.env.RESEND_FROM || 'Meal Tracker <onboarding@resend.dev>';
