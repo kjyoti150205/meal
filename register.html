@@ -233,6 +233,10 @@ to{
 
 body{
     padding:15px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+    height: auto;
 }
 
 .card{
@@ -245,8 +249,25 @@ body{
 
 .home-btn{
     width:100%;
+    min-height: 48px;
+    justify-content: center;
 }
 
+input, select, button[type="submit"] {
+    font-size: 16px;
+    min-height: 48px;
+}
+
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 18px 14px;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
 }
 </style>
 </head>

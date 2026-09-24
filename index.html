@@ -315,6 +315,41 @@ background-position:0% 50%;
             text-shadow: none;
         }
 
+        /* Top bar layout helpers */
+        .top-bar-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            width: 100%;
+            flex: 1 1 100%;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .top-bar .nav-links-wrap {
+            flex: 1 1 auto;
+        }
+
+        @media (min-width: 769px) {
+            .top-bar-row {
+                display: contents;
+            }
+
+            .nav-links-wrap {
+                display: block;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+        }
+
         /* Background Design */
         .background-design {
             position: fixed;
@@ -732,25 +767,179 @@ html[data-theme="dark"] .option-card{
         }
 
         @media (max-width: 768px) {
+            .top-bar {
+                padding: 12px 14px;
+                gap: 0;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .top-bar-row {
+                gap: 8px;
+            }
+
+            .top-bar h2 {
+                font-size: clamp(0.72rem, 3.2vw, 0.95rem);
+                flex: 1;
+                min-width: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .top-bar-actions {
+                gap: 6px;
+            }
+
+            #themeToggle {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                font-size: 0.9rem;
+            }
+
+            .admin-access a {
+                padding: 7px 10px;
+                font-size: 0.68rem;
+                white-space: nowrap;
+            }
+
+            .nav-links-wrap {
+                width: 100%;
+                display: none;
+            }
+
+            .nav-links-wrap.mobile-open {
+                display: block;
+                padding: 0.35rem 0 0.5rem;
+                border-top: 1px solid rgba(255,255,255,0.08);
+                margin-top: 8px;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                width: 100%;
+            }
+
+            .nav-links li {
+                width: 100%;
+            }
+
+            .nav-links a {
+                display: flex;
+                align-items: center;
+                min-height: 44px;
+                padding: 0.6rem 0.25rem;
+                font-size: 0.9rem;
+            }
+
+            .datetime-display {
+                width: 100%;
+                text-align: center;
+                padding-top: 8px;
+                margin-top: 4px;
+                border-top: 1px solid rgba(255,255,255,0.08);
+            }
+
+            .top-bar .datetime-display .time {
+                font-size: 1.15rem;
+            }
+
+            .top-bar .datetime-display .date {
+                font-size: 0.72rem;
+            }
+
             .container {
-                padding: 1rem;
+                margin: 12px auto;
+                padding: 18px 14px;
+                border-radius: 20px;
             }
 
             .header h1 {
-                font-size: 2.5rem;
+                font-size: clamp(1.4rem, 6vw, 2rem);
+                line-height: 1.2;
+                word-break: break-word;
+            }
+
+            .header p {
+                font-size: 0.95rem;
             }
 
             .options-grid {
                 grid-template-columns: 1fr;
             }
 
-            .nav-links{ display:none; }
-            .footer-grid{ grid-template-columns:1fr 1fr; }
-            
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-top: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+                min-height: 48px;
+            }
+
+            footer.site-footer {
+                padding: 40px 16px 24px;
+                margin-top: 40px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+
+            #backToTop {
+                right: 16px;
+                bottom: 16px;
+                width: 44px;
+                height: 44px;
+            }
+
+            #welcomePopup {
+                top: auto;
+                bottom: 16px;
+                left: 16px;
+                right: 16px;
+                text-align: center;
+            }
         }
 
-        @media (max-width: 480px){
-            .footer-grid{ grid-template-columns:1fr; }
+        @media (max-width: 480px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar h2 {
+                font-size: 0.68rem;
+            }
+
+            .admin-access a {
+                padding: 6px 8px;
+                font-size: 0.62rem;
+            }
         }
 
             .admin-access a{
@@ -912,26 +1101,30 @@ box-shadow:0 10px 30px rgba(0,0,0,.2);
 
     <!-- Top Bar for Date and Time -->
     <div class="top-bar" id="topBar">
-        <h2> MATANGINI BHAWAN (LH 1) </h2>
+        <div class="top-bar-row">
+            <button class="hamburger-btn" id="homeNavToggle" aria-label="Toggle menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <h2> MATANGINI BHAWAN (LH 1) </h2>
+            <div class="top-bar-actions">
+                <button id="themeToggle" title="Toggle theme" aria-label="Toggle dark and light theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="admin-access">
+                    <a href="admin-login.html" target="_blank" rel="noopener noreferrer">⚙ Admin Login</a>
+                </div>
+            </div>
+        </div>
 
-        <ul class="nav-links">
-            <li><a href="#home" class="active-link">Home</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#stats">Stats</a></li>
-            <li><a href="#siteFooter">Contact</a></li>
-        </ul>
+        <div class="nav-links-wrap" id="homeNavWrap">
+            <ul class="nav-links" id="homeNavLinks">
+                <li><a href="#home" class="active-link">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#stats">Stats</a></li>
+                <li><a href="#siteFooter">Contact</a></li>
+            </ul>
+        </div>
 
-        <button id="themeToggle" title="Toggle theme" aria-label="Toggle dark and light theme">
-            <i class="fas fa-moon"></i>
-        </button>
-
-       <div class="admin-access">
-    <a href="admin-login.html"
-       target="_blank"
-       rel="noopener noreferrer">
-        ⚙ Admin Login
-    </a>
-</div>
         <div class="datetime-display">
             <div class="date" id="currentDate">Loading...</div>
             <div class="time" id="currentTime">Loading...</div>
@@ -1227,6 +1420,36 @@ if (user) {
 
             backToTop.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        })();
+
+        // ---- Mobile nav toggle ----
+        (function mobileNav(){
+            const toggle = document.getElementById('homeNavToggle');
+            const wrap = document.getElementById('homeNavWrap');
+            const links = document.getElementById('homeNavLinks');
+            if (!toggle || !wrap || !links) return;
+
+            toggle.addEventListener('click', () => {
+                const open = wrap.classList.toggle('mobile-open');
+                toggle.classList.toggle('open', open);
+                toggle.setAttribute('aria-expanded', open);
+            });
+
+            links.querySelectorAll('a').forEach((a) => {
+                a.addEventListener('click', () => {
+                    wrap.classList.remove('mobile-open');
+                    toggle.classList.remove('open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!toggle.contains(e.target) && !wrap.contains(e.target)) {
+                    wrap.classList.remove('mobile-open');
+                    toggle.classList.remove('open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
             });
         })();
 

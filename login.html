@@ -525,10 +525,18 @@ opacity:0;
 @media(max-width:600px){
 
     body {
+        overflow-x: hidden;
         overflow-y: auto;
         padding: 16px;
         align-items: flex-start;
         padding-top: 2rem;
+        min-height: 100vh;
+        height: auto;
+    }
+
+    .container {
+        padding: 12px;
+        align-items: flex-start;
     }
 
     .card {

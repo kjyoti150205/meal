@@ -51,6 +51,7 @@ body{
   background:var(--gradient-bg);
   background-attachment:fixed;
   min-height:100vh;
+  overflow-x:hidden;
 }
 
 h1,h2,h3,h4{ font-family:'Sora', sans-serif; margin:0; color:var(--text); }
@@ -305,6 +306,86 @@ a:focus-visible, button:focus-visible, .input:focus-visible, .upload-drop:focus-
   outline-offset:2px;
 }
 
+@media (max-width: 768px) {
+  .complaint-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .complaint-nav .brand h1 {
+    font-size: 0.95rem;
+  }
+
+  .complaint-nav .btn {
+    min-height: 44px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page-shell {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .page-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .glass-card {
+    padding: 1.1rem;
+  }
+
+  .priority-picker {
+    flex-direction: column;
+  }
+
+  .priority-option {
+    min-height: 44px;
+  }
+
+  .complaints-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .complaint-card .top-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .complaint-card .foot-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn.btn-primary {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .complaint-nav .brand .logo-badge {
+    width: 34px;
+    height: 34px;
+  }
+
+  .page-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .upload-drop {
+    padding: 1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
 }
@@ -317,7 +398,7 @@ a:focus-visible, button:focus-visible, .input:focus-visible, .upload-drop:focus-
         <div class="logo-badge"><i class="fa-solid fa-utensils"></i></div>
         <h1>Meal Tracker</h1>
     </div>
-    <a href="dashboard.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+    <a href="user_dashboard.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
 </nav>
 
 <div class="page-shell">

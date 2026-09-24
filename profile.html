@@ -307,24 +307,71 @@ input:focus{
 @media(max-width:768px){
 
 .header{
-
     text-align:center;
-
     justify-content:center;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+}
+
+.header h1 {
+    font-size: 1.4rem;
+}
+
+.profile-card {
+    padding: 20px 16px;
 }
 
 .profile-header{
-
     flex-direction:column;
-
     text-align:center;
+    gap: 16px;
+}
+
+.profile-pic {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto;
+}
+
+.profile-info h2 {
+    font-size: 1.35rem;
+    word-break: break-word;
 }
 
 .save-btn,
-.back-btn{
-
+.back-btn,
+.upload-btn{
     width:100%;
+    min-height: 48px;
+    justify-content: center;
 }
+
+input {
+    font-size: 16px;
+    min-height: 48px;
+}
+
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 12px 10px;
+    }
+
+    .header h1 {
+        font-size: 1.2rem;
+    }
+
+    .profile-card {
+        padding: 16px 12px;
+        border-radius: 16px;
+    }
+
+    .profile-pic {
+        width: 90px;
+        height: 90px;
+    }
 }
    </style>
 </head>

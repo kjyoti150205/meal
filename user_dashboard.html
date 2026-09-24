@@ -476,11 +476,20 @@
     margin-bottom:25px;
 }
 
-.countdown-card{
+        .countdown-card{
     background:white;
     text-align:center;
     padding:25px;
     border-radius:20px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.countdown-card h1 {
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    margin: 0.5rem 0;
 }
 
 .session-badge{
@@ -574,7 +583,28 @@
     .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
     .meal-box { padding: 14px; }
     .countdown-card { padding: 16px; }
-    .countdown-card h1 { font-size: 2rem; }
+    .countdown-card h1 {
+        font-size: clamp(1.35rem, 7vw, 2rem);
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+    .hero-card h1 {
+        font-size: clamp(1.1rem, 5vw, 1.4rem);
+        word-break: break-word;
+    }
+    .hero-time h2 {
+        font-size: clamp(1rem, 5vw, 1.35rem);
+    }
+    .navbar h1 {
+        font-size: 1rem !important;
+    }
+    .meal-control-card h2 {
+        font-size: 1.1rem;
+    }
+    .history-item div {
+        font-size: 0.85rem;
+        word-break: break-word;
+    }
 }
     </style>
 </head>
